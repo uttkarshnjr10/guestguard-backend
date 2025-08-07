@@ -1,0 +1,93 @@
+# ========================
+# OS Specific Files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Node.js / JavaScript
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*.local
+!.env.example
+
+# Build output
+dist/
+build/
+.out/
+.next/
+.cache/
+tmp/
+temp/
+coverage/
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# ========================
+# IDEs and Editors
+# ========================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ========================
+# Testing
+# ========================
+jest-html-reporters-*.html
+coverage/
+test-results/
+
+# ========================
+# Miscellaneous
+# ========================
+*.tgz
+*.zip
+*.bak
+*.swp
+*.swo
+*.swn
+*.orig
+
+# ========================
+# TypeScript
+# ========================
+*.tsbuildinfo
+
+# ========================
+# Mac Specific
+# ========================
+.AppleDouble
+.LSOverride
+Icon?
+ehthumbs.db
+
+# ========================
+# Images
+# ========================
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# ========================
+# Optional Custom
+# ========================
+# Uncomment or add additional folders/files specific to your setup
+# public/
+# uploads/
