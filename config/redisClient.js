@@ -1,21 +1,24 @@
 const redis = require('redis');
 const logger = require('../utils/logger');
 
-// >> Use environment variable for the Redis URL for production flexibility.
+// Create the Redis client with fallback to localhost if REDIS_URL is not set
 const client = redis.createClient({
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 
-client.on('error', (err) => logger.error(`Redis Client Error: ${err}`));
+// Handle Redis error events
+client.on('error', (err) => {
+  logger.error(`❌ Redis Client Error: ${err.message}`);
+});
 
+// Connect to Redis
 const connectRedis = async () => {
   try {
     await client.connect();
-    logger.info('Redis connected successfully. ⚡');
+    logger.info('✅ Redis connected successfully.');
   } catch (err) {
-    logger.error(`Could not establish a connection with Redis: ${err}`);
-    // >> In production, you might want the app to exit if Redis is critical.
-    process.exit(1);
+    logger.error(`❌ Failed to connect to Redis: ${err.message}`);
+    process.exit(1); // Exit the app if Redis is critical
   }
 };
 
