@@ -183,7 +183,9 @@
     "xtend": "^4.0.2"
   },
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node seeder.js"
   },
   "repository": {
     "type": "git",
