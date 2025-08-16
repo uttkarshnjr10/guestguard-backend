@@ -51,4 +51,51 @@ const sendCredentialsEmail = async (toEmail, username, temporaryPassword) => {
   }
 };
 
-module.exports = { sendCredentialsEmail };
+/**
+ * Sends a checkout receipt email with the PDF attachment to a guest.
+ * @param {string} toEmail - The guest's email address
+ * @param {object} guest - Guest document used to personalize the email
+ * @param {Buffer} pdfBuffer - The PDF buffer to attach
+ */
+const sendCheckoutReceiptEmail = async (toEmail, guest, pdfBuffer) => {
+  const fromEmail = process.env.FROM_EMAIL;
+  const base64Pdf = pdfBuffer.toString('base64');
+
+  const msg = {
+    to: toEmail,
+    from: {
+      name: 'GuestGuard Hotel',
+      email: fromEmail,
+    },
+    subject: `Your Checkout Receipt - ${guest.customerId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <p>Dear ${guest.primaryGuest?.name || 'Guest'},</p>
+        <p>Thank you for staying with us. Please find your checkout receipt attached.</p>
+        <p><strong>Customer ID:</strong> ${guest.customerId}<br/>
+           <strong>Room:</strong> ${guest.stayDetails?.roomNumber || 'N/A'}<br/>
+           <strong>Hotel:</strong> ${guest.hotel?.name || ''}, ${guest.hotel?.city || ''}
+        </p>
+        <p>If you have any questions, reply to this email.</p>
+        <p>Warm regards,<br/>GuestGuard</p>
+      </div>
+    `,
+    attachments: [
+      {
+        content: base64Pdf,
+        filename: `checkout_${guest.customerId}.pdf`,
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
+  };
+
+  try {
+    await sgMail.send(msg);
+    logger.info(`Checkout receipt emailed to ${toEmail} for ${guest.customerId}`);
+  } catch (error) {
+    logger.error(`Failed to send checkout receipt to ${toEmail}:`, error.response?.body || error);
+  }
+};
+
+module.exports = { sendCredentialsEmail, sendCheckoutReceiptEmail };
