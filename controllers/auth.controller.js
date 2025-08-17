@@ -1,3 +1,4 @@
+// controllers/auth.controller.js
 const User = require('../models/User.model');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
@@ -9,14 +10,21 @@ const generateToken = (id, role, username) => {
     return jwt.sign({ id, role, username }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// >> THIS IS THE MISSING FUNCTION
+// Login
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
+
+        // ✅ NEW: Check if the user's account is suspended
+        if (user.status === 'Suspended') {
+            res.status(403); // Forbidden
+            throw new Error('Your account has been suspended. Please contact the administrator.');
+        }
+
+        // This status code tells the frontend to redirect to the reset page
         if (user.passwordChangeRequired) {
-            // This status code tells the frontend to redirect to the reset page
             return res.status(202).json({
                 message: 'Password change required',
                 userId: user._id,
@@ -36,9 +44,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 });
 
-// >> This is the function for the PUBLIC reset password page
+// Public reset password page
 const changePassword = asyncHandler(async (req, res) => {
-    // For this public route, we MUST get the userId from the body.
     const { userId, newPassword } = req.body;
 
     if (!userId || !newPassword || newPassword.length < 6) {
@@ -60,7 +67,7 @@ const changePassword = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Password changed successfully. Please log in again.' });
 });
 
-// >> This is the updated logout function
+// Logout
 const logoutUser = asyncHandler(async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -84,5 +91,4 @@ const logoutUser = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Logged out successfully' });
 });
 
-// >> Now all three functions are defined before being exported
 module.exports = { loginUser, changePassword, logoutUser };

@@ -2,10 +2,9 @@
 const User = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
-// >> 1. Import the new email function
 const { sendCredentialsEmail } = require('../utils/sendEmail');
 
-// This is the user registration function
+// --- Create a new user (Admin action) ---
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, role, details } = req.body;
 
@@ -28,17 +27,13 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (user) {
-        // >> 2. Call the email function after the user is successfully created.
-        // This sends the email in the background without making the admin wait.
         sendCredentialsEmail(user.email, user.username, temporaryPassword);
-
         logger.info(`New user (${user.role}) created by Admin ${req.user.username}: ${user.email}`);
         
-        // >> 3. Respond to the admin immediately.
         res.status(201).json({
             message: 'User created successfully. Credentials have been emailed.',
             username: user.username,
-            temporaryPassword: temporaryPassword, // Still show credentials on screen as a backup
+            temporaryPassword: temporaryPassword, // backup display
         });
     } else {
         res.status(400);
@@ -46,8 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 });
 
-
-// Get user profile
+// --- Get logged-in user's profile ---
 const getUserProfile = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select('-password');
 
@@ -65,7 +59,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-// Update user password (for logged-in users)
+// --- Update logged-in user's password ---
 const updateUserPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
@@ -87,7 +81,7 @@ const updateUserPassword = asyncHandler(async (req, res) => {
     }
 });
 
-// Get all dashboard data
+// --- Get Admin Dashboard Data ---
 const getAdminDashboardData = asyncHandler(async (req, res) => {
     const hotelCount = await User.countDocuments({ role: 'Hotel' });
     const policeCount = await User.countDocuments({ role: 'Police' });
@@ -129,11 +123,73 @@ const getAdminDashboardData = asyncHandler(async (req, res) => {
     });
 });
 
+// --- Get Hotel Users with Filtering ---
+const getHotelUsers = asyncHandler(async (req, res) => {
+    const { searchTerm, status } = req.query;
+    const query = { role: 'Hotel' };
 
-// Export all controller functions
+    if (status && status !== 'All') {
+        query.status = status;
+    }
+
+    if (searchTerm) {
+        const regex = new RegExp(searchTerm, 'i');
+        query.$or = [
+            { username: regex },
+            { 'details.city': regex }
+        ];
+    }
+
+    const hotels = await User.find(query).select('username details.city status');
+
+    res.json(hotels.map(h => ({
+        id: h._id,
+        name: h.username,
+        city: h.details?.city,
+        status: h.status,
+    })));
+});
+
+// --- Update a user's status ---
+const updateUserStatus = asyncHandler(async (req, res) => {
+    const { status } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        user.status = status;
+        const updatedUser = await user.save();
+        logger.info(`Admin ${req.user.username} updated status for user ${user.username} to ${status}`);
+        res.json({
+            id: updatedUser._id,
+            status: updatedUser.status,
+        });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// --- Delete a user ---
+const deleteUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        await user.deleteOne();
+        logger.info(`Admin ${req.user.username} deleted user ${user.username}`);
+        res.json({ message: 'User removed successfully' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// --- Export all controller functions ---
 module.exports = { 
     registerUser, 
     getUserProfile, 
     updateUserPassword,
-    getAdminDashboardData
+    getAdminDashboardData,
+    getHotelUsers,
+    updateUserStatus,
+    deleteUser
 };

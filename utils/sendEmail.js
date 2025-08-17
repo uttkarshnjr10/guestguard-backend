@@ -2,20 +2,14 @@
 const sgMail = require('@sendgrid/mail');
 const logger = require('./logger');
 
-// Set the API key from your .env file
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const fromEmail = process.env.FROM_EMAIL; // Your verified SendGrid sender
 
 /**
  * Sends the credentials email to a newly registered user.
- * @param {string} toEmail - The recipient's email address.
- * @param {string} username - The generated username.
- * @param {string} temporaryPassword - The generated temporary password.
  */
 const sendCredentialsEmail = async (toEmail, username, temporaryPassword) => {
-  // IMPORTANT: You must verify a "Single Sender" email address in your SendGrid account.
-  // This 'from' email MUST match your verified sender.
-  const fromEmail =  process.env.FROM_EMAIL; // Replace with your verified SendGrid sender
-
   const msg = {
     to: toEmail,
     from: {
@@ -23,7 +17,6 @@ const sendCredentialsEmail = async (toEmail, username, temporaryPassword) => {
         email: fromEmail,
     },
     subject: 'Your GuestGuard Account Credentials',
-    // Use a professional HTML template for the email body
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <h2>Welcome to GuestGuard!</h2>
@@ -36,7 +29,6 @@ const sendCredentialsEmail = async (toEmail, username, temporaryPassword) => {
         <a href="${process.env.FRONTEND_URL}/login" style="display: inline-block; background-color: #2563eb; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
           Login Now
         </a>
-        <p style="font-size: 0.9em; color: #777;">If you were not expecting this email, please disregard it.</p>
       </div>
     `,
   };
@@ -45,10 +37,47 @@ const sendCredentialsEmail = async (toEmail, username, temporaryPassword) => {
     await sgMail.send(msg);
     logger.info(`Credentials email sent successfully to ${toEmail}`);
   } catch (error) {
-    logger.error(`Failed to send email to ${toEmail}:`, error.response?.body || error);
-    // Even if email fails, we don't want to stop the registration process.
-    // The admin can still see the credentials on screen.
+    logger.error(`Failed to send credentials email to ${toEmail}:`, error.response?.body || error);
   }
 };
 
-module.exports = { sendCredentialsEmail };
+/**
+ * Sends the checkout receipt email with a PDF attachment.
+ */
+const sendCheckoutEmail = async (toEmail, hotelEmail, guestName, pdfBuffer) => {
+  const msg = {
+    // Send to both the guest and a copy to the hotel
+    to: [toEmail, hotelEmail], 
+    from: {
+        name: 'GuestGuard Receipts',
+        email: fromEmail,
+    },
+    subject: `Your Checkout Receipt from ${guestName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2>Thank You for Your Stay!</h2>
+        <p>Dear ${guestName},</p>
+        <p>Thank you for staying with us. Your checkout has been processed successfully. Please find your receipt attached to this email.</p>
+        <p>We hope to see you again soon!</p>
+      </div>
+    `,
+    attachments: [
+      {
+        content: pdfBuffer.toString('base64'),
+        filename: `checkout_receipt_${guestName.replace(/\s+/g, '_')}.pdf`,
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
+  };
+
+  try {
+    await sgMail.send(msg);
+    logger.info(`Checkout receipt sent successfully to ${toEmail} and ${hotelEmail}`);
+  } catch (error) {
+    logger.error(`Failed to send checkout email:`, error.response?.body || error);
+  }
+};
+
+
+module.exports = { sendCredentialsEmail, sendCheckoutEmail };

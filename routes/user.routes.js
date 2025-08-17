@@ -1,13 +1,18 @@
 // routes/user.routes.js
 const express = require('express');
 const router = express.Router();
+
 // >> Make sure all necessary functions are imported from the controller
 const { 
     registerUser, 
     getUserProfile, 
     updateUserPassword,
-    getAdminDashboardData
+    getAdminDashboardData,
+    getHotelUsers,       // For /hotels route
+    updateUserStatus,    // For PUT /:id/status
+    deleteUser           // For DELETE /:id
 } = require('../controllers/user.controller');
+
 const { protect, authorize } = require('../middleware/auth.middleware');
 
 // --- Regional Admin Routes ---
@@ -28,16 +33,39 @@ router.get(
     getAdminDashboardData
 );
 
+// GET /api/users/hotels
+// Fetch all users with the 'Hotel' role
+router.get(
+    '/hotels', 
+    protect, 
+    authorize('Regional Admin'), 
+    getHotelUsers
+);
+
+// PUT /api/users/:id/status
+// Update a specific user's status (Active, Suspended, etc.)
+router.put(
+    '/:id/status',
+    protect,
+    authorize('Regional Admin'),
+    updateUserStatus
+);
+
+// DELETE /api/users/:id
+// Delete a user from the database
+router.delete(
+    '/:id',
+    protect,
+    authorize('Regional Admin'),
+    deleteUser
+);
 
 // --- General Authenticated User Routes ---
 
-// >> FIX: This GET route for '/profile' was missing or incorrect.
-// It tells Express: "When a GET request comes to /api/users/profile,
-// first run the 'protect' middleware, then run the 'getUserProfile' controller."
+// GET /api/users/profile
 router.get('/profile', protect, getUserProfile);
 
 // PUT /api/users/change-password
 router.put('/change-password', protect, updateUserPassword);
-
 
 module.exports = router;

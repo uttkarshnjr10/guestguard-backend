@@ -1,8 +1,6 @@
 // models/Guest.model.js
 
 const mongoose = require('mongoose');
-
-// We will generate a unique customer ID for each registration
 const { randomBytes } = require('crypto');
 
 const individualGuestSchema = new mongoose.Schema({
@@ -15,7 +13,6 @@ const individualGuestSchema = new mongoose.Schema({
 }, { _id: false });
 
 const guestSchema = new mongoose.Schema({
-    // NEW: A unique, human-readable ID for searching and reference
     customerId: {
         type: String,
         unique: true,
@@ -29,28 +26,20 @@ const guestSchema = new mongoose.Schema({
     idNumber: { type: String, required: true, trim: true },
     idImageURL: { type: String, required: true },
     livePhotoURL: { type: String, required: true },
-   // models/Guest.model.js
-
-// ... (rest of the schema)
-
-accompanyingGuests: {
-    adults: [{
-        name: { type: String, required: true, trim: true },
-        gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
-        // NEW: Add a field for the photo URL if you add this to the frontend
-        livePhotoURL: { type: String }, 
-        _id: false
-    }],
-    children: [{
-        name: { type: String, required: true, trim: true },
-        gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
-        // NEW: Add a field for the photo URL
-        livePhotoURL: { type: String },
-        _id: false
-    }]
-},
-
-// ... (rest of the schema)
+    accompanyingGuests: {
+        adults: [{
+            name: { type: String, required: true, trim: true },
+            gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
+            livePhotoURL: { type: String }, 
+            _id: false
+        }],
+        children: [{
+            name: { type: String, required: true, trim: true },
+            gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
+            livePhotoURL: { type: String },
+            _id: false
+        }]
+    },
     stayDetails: {
         purposeOfVisit: { type: String, required: true, trim: true },
         checkIn: { type: Date, default: Date.now },
@@ -59,10 +48,10 @@ accompanyingGuests: {
     },
     hotel: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Hotel',
+        // >> FIX: Changed 'Hotel' to 'User' to correctly reference your users collection.
+        ref: 'User', 
         required: true,
     },
-    // NEW: This field will track if a guest is currently in the hotel
     status: {
         type: String,
         enum: ['Checked-In', 'Checked-Out'],
@@ -77,7 +66,6 @@ accompanyingGuests: {
 // Before saving a new guest, automatically generate a unique customerId
 guestSchema.pre('validate', function(next) {
     if (this.isNew) {
-        // Creates a simple, unique ID like "G-A3B4C5"
         this.customerId = `G-${randomBytes(3).toString('hex').toUpperCase()}`;
     }
     next();

@@ -31,6 +31,7 @@ if (process.env.NODE_ENV === 'development') {
 // --- API Routes ---
 app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
+app.use('/api/guests', require('./routes/guest.routes.js'));
 // ... other routes
 
 app.get('/', (req, res) => {
