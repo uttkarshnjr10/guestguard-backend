@@ -3,6 +3,7 @@ const User = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const { sendCredentialsEmail } = require('../utils/sendEmail');
+const AccessLog = require('../models/AccessLog.model');
 
 // --- Create a new user (Admin action) ---
 const registerUser = asyncHandler(async (req, res) => {
@@ -51,7 +52,8 @@ const getUserProfile = asyncHandler(async (req, res) => {
             username: user.username,
             email: user.email,
             role: user.role,
-            memberSince: user.createdAt
+            memberSince: user.createdAt,
+            details: user.details
         });
     } else {
         res.status(404);
@@ -183,7 +185,85 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
 });
 
-// --- Export all controller functions ---
+// --- Get all access logs with optional search ---
+const getAccessLogs = asyncHandler(async (req, res) => {
+    const { searchTerm } = req.query;
+    let query = {};
+
+    if (searchTerm) {
+        const regex = new RegExp(searchTerm, 'i');
+        const users = await User.find({ username: regex }).select('_id');
+        const userIds = users.map(user => user._id);
+
+        query.$or = [
+            { action: regex },
+            { reason: regex },
+            { searchQuery: regex },
+            { user: { $in: userIds } }
+        ];
+    }
+
+    const logs = await AccessLog.find(query)
+        .populate('user', 'username role')
+        .sort({ timestamp: -1 });
+
+    res.status(200).json(logs);
+});
+
+// --- Update logged-in user's profile details ---
+const updateUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id);
+
+    if (user) {
+        user.email = req.body.email || user.email;
+        if (req.body.details) {
+            user.details = { ...user.details, ...req.body.details };
+        }
+
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            details: updatedUser.details,
+        });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// --- Get Police Users with Filtering ---
+const getPoliceUsers = asyncHandler(async (req, res) => {
+    const { searchTerm, status } = req.query;
+    const query = { role: 'Police' };
+
+    if (status && status !== 'All') {
+        query.status = status;
+    }
+
+    if (searchTerm) {
+        const regex = new RegExp(searchTerm, 'i');
+        query.$or = [
+            { username: regex },
+            { 'details.station': regex },
+            { 'details.jurisdiction': regex }
+        ];
+    }
+
+    const policeUsers = await User.find(query).select('username details.jurisdiction status');
+
+    res.json(policeUsers.map(p => ({
+        id: p._id,
+        name: p.username,
+        location: p.details?.jurisdiction,
+        status: p.status,
+    })));
+});
+
+// --- Export controller functions ---
 module.exports = { 
     registerUser, 
     getUserProfile, 
@@ -191,5 +271,8 @@ module.exports = {
     getAdminDashboardData,
     getHotelUsers,
     updateUserStatus,
-    deleteUser
+    deleteUser,
+    getAccessLogs,
+    updateUserProfile,
+    getPoliceUsers,
 };
