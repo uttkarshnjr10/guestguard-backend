@@ -10,7 +10,10 @@ const {
     getAdminDashboardData,
     getHotelUsers,       // For /hotels route
     updateUserStatus,    // For PUT /:id/status
-    deleteUser           // For DELETE /:id
+    deleteUser,  
+    getAccessLogs,
+    updateUserProfile,
+    getPoliceUsers
 } = require('../controllers/user.controller');
 
 const { protect, authorize } = require('../middleware/auth.middleware');
@@ -59,13 +62,26 @@ router.delete(
     authorize('Regional Admin'),
     deleteUser
 );
-
+router.get(
+    '/admin/logs',
+    protect,
+    authorize('Regional Admin'),
+    getAccessLogs
+);
 // --- General Authenticated User Routes ---
 
-// GET /api/users/profile
-router.get('/profile', protect, getUserProfile);
+router.route('/profile')
+    .get(protect, getUserProfile)
+    .put(protect, updateUserProfile);
 
 // PUT /api/users/change-password
 router.put('/change-password', protect, updateUserPassword);
+
+router.get(
+    '/police',
+    protect,
+    authorize('Regional Admin'),
+    getPoliceUsers
+);
 
 module.exports = router;

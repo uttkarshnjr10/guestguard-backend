@@ -1,93 +1,84 @@
-# ========================
-# OS Specific Files
-# ========================
-.DS_Store
-Thumbs.db
-
-# ========================
-# Node.js / JavaScript
-# ========================
-node_modules/
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Environment variables
-.env
-.env.*.local
-!.env.example
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Build output
-dist/
-build/
-.out/
-.next/
-.cache/
-tmp/
-temp/
-coverage/
-
-# ========================
-# Logs
-# ========================
-*.log
-logs/
+# Runtime data
+pids
 *.pid
 *.seed
 *.pid.lock
 
-# ========================
-# IDEs and Editors
-# ========================
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build output
+dist/
+build/
+.cache/
+.next/
+out/
+.tmp/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Parcel cache
+.cache/
+.parcel-cache/
+
+# Vite cache
+vite.config.ts.timestamp-*
+vite.config.mjs.timestamp-*
+
+# Rollup cache
+.rollup.cache/
+
+# FuseBox cache
+.fusebox/
+
+# Snowpack
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+*.tsbuildinfo.*
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production
+.env.production.local
+
+# Firebase cache
+.firebase/
+
+# VSCode
 .vscode/
 .idea/
-*.sublime-workspace
-*.sublime-project
 
-# ========================
-# Testing
-# ========================
-jest-html-reporters-*.html
-coverage/
-test-results/
-
-# ========================
-# Miscellaneous
-# ========================
-*.tgz
-*.zip
-*.bak
-*.swp
-*.swo
-*.swn
-*.orig
-
-# ========================
-# TypeScript
-# ========================
-*.tsbuildinfo
-
-# ========================
-# Mac Specific
-# ========================
-.AppleDouble
-.LSOverride
-Icon?
-ehthumbs.db
-
-# ========================
-# Images
-# ========================
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-
-# ========================
-# Optional Custom
-# ========================
-# Uncomment or add additional folders/files specific to your setup
-# public/
-# uploads/
+# Mac / Windows system files
+.DS_Store
+Thumbs.db

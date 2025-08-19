@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+     status: {
+        type: String,
+        enum: ['Active', 'Suspended'],
+        default: 'Active',
+    },
 });
 
 // This "pre-save hook" automatically hashes the password before saving

@@ -32,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
+app.use('/api/police', require('./routes/police.routes.js'));
 // ... other routes
 
 app.get('/', (req, res) => {

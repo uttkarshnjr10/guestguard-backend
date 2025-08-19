@@ -13,6 +13,15 @@ const accessLogSchema = new mongoose.Schema({
         required: true,
         // Example: "Logged in", "Registered guest: [Guest Name]", "Searched for: [Query]"
     },
+    searchQuery: {
+        type: String,
+        trim: true,
+    },
+    // NEW: Add a mandatory reason for sensitive actions
+    reason: {
+        type: String,
+        trim: true,
+    },
     timestamp: {
         type: Date,
         default: Date.now,
