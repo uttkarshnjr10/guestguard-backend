@@ -6,6 +6,7 @@ const morgan = require('morgan'); // >> For request logging
 const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redisClient');
 const logger = require('./utils/logger');
+const notificationRoutes = require('./routes/notification.routes');
 const { notFound, errorHandler } = require('./middleware/error.middleware'); // >> Import centralized handlers
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
+app.use('/api/notifications', notificationRoutes);
 // ... other routes
 
 app.get('/', (req, res) => {
