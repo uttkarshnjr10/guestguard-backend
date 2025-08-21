@@ -22,6 +22,9 @@ const storage = new CloudinaryStorage({
 });
 
 // Initialize Multer with the storage configuration
-const upload = multer({ storage: storage });
 
-module.exports = upload;
+// 1. Initialize Multer and name the variable 'photoUpload'
+const photoUpload = multer({ storage: storage });
+
+// 2. Export it inside an object
+module.exports = { photoUpload };

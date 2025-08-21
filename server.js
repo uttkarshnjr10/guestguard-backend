@@ -9,7 +9,8 @@ const logger = require('./utils/logger');
 const notificationRoutes = require('./routes/notification.routes');
 const { notFound, errorHandler } = require('./middleware/error.middleware'); // >> Import centralized handlers
 const policeStationRoutes = require('./routes/policeStation.routes');
-
+const verificationRoutes = require('./routes/verification.routes');
+const uploadRoutes = require('./routes/upload.routes');
 
 dotenv.config();
 connectDB();
@@ -38,6 +39,9 @@ app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/stations', policeStationRoutes);
+app.use('/api/verify', verificationRoutes);
+app.use('/api/upload', uploadRoutes);
+
 // ... other routes
 
 app.get('/', (req, res) => {
