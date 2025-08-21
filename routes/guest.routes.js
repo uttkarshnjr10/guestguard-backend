@@ -12,7 +12,8 @@ const {
 } = require('../controllers/guest.controller');
 
 const { protect, authorize } = require('../middleware/auth.middleware');
-const upload = require('../middleware/upload.middleware');
+// 1. CHANGE THIS LINE: Use destructuring to import photoUpload
+const { photoUpload } = require('../middleware/upload.middleware');
 
 // --- Hotel Staff Routes ---
 
@@ -21,7 +22,8 @@ router.post(
   '/register',
   protect,
   authorize('Hotel'),
-  upload.fields([
+  // 2. CHANGE THIS LINE: Use the correct variable name 'photoUpload'
+  photoUpload.fields([
     { name: 'idImageFront', maxCount: 1 },
     { name: 'idImageBack', maxCount: 1 },
     { name: 'livePhoto', maxCount: 1 }

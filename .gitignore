@@ -82,3 +82,4 @@ web_modules/
 # Mac / Windows system files
 .DS_Store
 Thumbs.db
+google-credentials.json
