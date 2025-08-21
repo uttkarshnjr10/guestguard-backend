@@ -4,10 +4,17 @@ const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const { sendCredentialsEmail } = require('../utils/sendEmail');
 const AccessLog = require('../models/AccessLog.model');
+const crypto = require('crypto');
+
 
 // --- Create a new user (Admin action) ---
+
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, role, details } = req.body;
+    // This log will help confirm data arrival
+    console.log("--- INCOMING REQUEST BODY ---", req.body);
+
+    // >> 2. Destructure policeStation from the request body
+    const { username, email, role, details, policeStation } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -16,16 +23,25 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User with this email already exists');
     }
 
-    const temporaryPassword = Math.random().toString(36).slice(-8);
+    // >> 3. Use crypto for a more secure temporary password
+    const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
-    const user = await User.create({
+    // Create the user data object
+    const userToCreate = {
         username,
         email,
         role,
         password: temporaryPassword,
         passwordChangeRequired: true,
         details: details || {},
-    });
+    };
+
+    // >> 4. Conditionally add policeStation ONLY if the role is 'Police'
+    if (role === 'Police') {
+        userToCreate.policeStation = policeStation;
+    }
+
+    const user = await User.create(userToCreate);
 
     if (user) {
         sendCredentialsEmail(user.email, user.username, temporaryPassword);
@@ -34,7 +50,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(201).json({
             message: 'User created successfully. Credentials have been emailed.',
             username: user.username,
-            temporaryPassword: temporaryPassword, // backup display
+            temporaryPassword: temporaryPassword,
         });
     } else {
         res.status(400);
