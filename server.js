@@ -8,6 +8,8 @@ const { connectRedis } = require('./config/redisClient');
 const logger = require('./utils/logger');
 const notificationRoutes = require('./routes/notification.routes');
 const { notFound, errorHandler } = require('./middleware/error.middleware'); // >> Import centralized handlers
+const policeStationRoutes = require('./routes/policeStation.routes');
+
 
 dotenv.config();
 connectDB();
@@ -35,6 +37,7 @@ app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/stations', policeStationRoutes);
 // ... other routes
 
 app.get('/', (req, res) => {
