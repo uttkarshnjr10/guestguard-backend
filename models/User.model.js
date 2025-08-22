@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ['Hotel', 'Police', 'Regional Admin'], // ✅ consistent with your version
     },
+    details: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     // NEW: Link Police users to a PoliceStation
     policeStation: {
       type: mongoose.Schema.Types.ObjectId,
