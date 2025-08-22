@@ -1,5 +1,3 @@
-// models/Guest.model.js
-
 const mongoose = require('mongoose');
 const { randomBytes } = require('crypto');
 
@@ -9,7 +7,7 @@ const individualGuestSchema = new mongoose.Schema({
     dob: { type: Date, required: true },
     gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
     phone: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true }, // email compulsory
+    email: { type: String, required: true, trim: true, lowercase: true },
     address: { type: String, required: true, trim: true },
 }, { _id: false });
 
@@ -26,20 +24,28 @@ const guestSchema = new mongoose.Schema({
     },
     idType: { type: String, required: true },
     idNumber: { type: String, required: true, trim: true },
-    idImageFrontURL: { type: String, required: true }, // store front image
-    idImageBackURL: { type: String, required: true },  // store back image
+    idImageFrontURL: { type: String, required: true },
+    idImageBackURL: { type: String, required: true },
     livePhotoURL: { type: String, required: true },
     accompanyingGuests: {
         adults: [{
             name: { type: String, required: true, trim: true },
             gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
             livePhotoURL: { type: String },
+            idType: { type: String },
+            idNumber: { type: String, trim: true },
+            idImageFrontURL: { type: String },
+            idImageBackURL: { type: String },
             _id: false
         }],
         children: [{
             name: { type: String, required: true, trim: true },
             gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
             livePhotoURL: { type: String },
+            idType: { type: String },
+            idNumber: { type: String, trim: true },
+            idImageFrontURL: { type: String },
+            idImageBackURL: { type: String },
             _id: false
         }]
     },
@@ -51,7 +57,7 @@ const guestSchema = new mongoose.Schema({
     },
     hotel: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // reference to hotel user
+        ref: 'User',
         required: true,
     },
     status: {

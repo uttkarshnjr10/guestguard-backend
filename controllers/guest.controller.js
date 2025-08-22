@@ -1,9 +1,7 @@
-// controllers/guest.controller.js
-
 const Guest = require('../models/Guest.model');
-const PoliceStation = require('../models/PoliceStation.model'); // ✅ NEW
-const Notification = require('../models/Notification.model');   // ✅ NEW
-const User = require('../models/User.model');                   // ✅ NEW
+const PoliceStation = require('../models/PoliceStation.model');
+const Notification = require('../models/Notification.model');
+const User = require('../models/User.model');
 const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
@@ -24,14 +22,45 @@ const registerGuest = asyncHandler(async (req, res) => {
     return value ?? fallback;
   };
 
-  const primaryGuest = parseMaybeJson(req.body.primaryGuest, req.body.primaryGuest);
-  const stayDetails = parseMaybeJson(req.body.stayDetails, req.body.stayDetails);
-  const accompanyingGuests = parseMaybeJson(req.body.accompanyingGuests, { adults: [], children: [] });
+  // Process accompanying guests and attach their image URLs
+  const processGuests = (guestList, type) => {
+    return guestList.map((guest, index) => {
+      return {
+        ...guest,
+        idImageFrontURL: req.files[`${type}_${index}_idImageFront`]?.[0]?.path,
+        idImageBackURL: req.files[`${type}_${index}_idImageBack`]?.[0]?.path,
+        livePhotoURL: req.files[`${type}_${index}_livePhoto`]?.[0]?.path,
+      };
+    });
+  };
+
+  // Parse request body
+  const primaryGuestData = {
+    name: req.body.primaryGuestName,
+    dob: req.body.primaryGuestDob,
+    gender: req.body.primaryGuestGender,
+    phone: req.body.primaryGuestPhone,
+    email: req.body.primaryGuestEmail,
+    address: req.body.primaryGuestAddress,
+  };
+
+  const stayDetails = {
+    purposeOfVisit: req.body.purposeOfVisit,
+    checkIn: req.body.checkIn,
+    expectedCheckout: req.body.expectedCheckout,
+    roomNumber: req.body.roomNumber,
+  };
+
+  const accompanyingGuestsRaw = parseMaybeJson(req.body.accompanyingGuests, { adults: [], children: [] });
+  const accompanyingGuests = {
+    adults: processGuests(accompanyingGuestsRaw.adults, 'adult'),
+    children: processGuests(accompanyingGuestsRaw.children, 'child'),
+  };
 
   const idType = req.body.idType;
   const idNumber = req.body.idNumber;
 
-  // Handle front + back ID images and live photo
+  // Handle front + back ID images and live photo for primary guest
   const idImageFrontFile = req.files?.idImageFront?.[0];
   const idImageBackFile = req.files?.idImageBack?.[0];
   const livePhotoFile = req.files?.livePhoto?.[0];
@@ -45,8 +74,9 @@ const registerGuest = asyncHandler(async (req, res) => {
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
 
+  // Create guest record
   const guest = await Guest.create({
-    primaryGuest,
+    primaryGuest: primaryGuestData,
     idType,
     idNumber,
     idImageFrontURL,
@@ -124,7 +154,7 @@ const checkoutGuest = asyncHandler(async (req, res) => {
   const guest = await Guest.findById(guestId).populate('hotel', 'username email details');
 
   if (!guest) {
-    res.status(404);
+    res.status(400);
     throw new Error('Guest not found');
   }
 

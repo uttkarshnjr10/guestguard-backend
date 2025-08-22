@@ -20,7 +20,7 @@ const app = express();
 
 // --- Core Middleware ---
 app.use(cors({
- origin: ["http://localhost:5173", "https://guest-guard.vercel.app"],
+ origin: ["http://localhost:5173", "https://guest-guard.vercel.app" , "http://localhost:5174"],
   credentials: true
 }));
 
