@@ -158,11 +158,17 @@ const getHotelUsers = asyncHandler(async (req, res) => {
         ];
     }
 
-    const hotels = await User.find(query).select('username details.city status');
+    // UPDATED: Select more hotel specific details
+    const hotels = await User.find(query)
+        .select('username email details.hotelName details.address details.phone status');
 
     res.json(hotels.map(h => ({
         id: h._id,
         name: h.username,
+        email: h.email, // Include email
+        hotelName: h.details?.hotelName, // Include hotelName
+        address: h.details?.address, // Include address
+        phone: h.details?.phone, // Include phone
         city: h.details?.city,
         status: h.status,
     })));
@@ -269,12 +275,17 @@ const getPoliceUsers = asyncHandler(async (req, res) => {
         ];
     }
 
-    const policeUsers = await User.find(query).select('username details.jurisdiction status');
+    // MODIFIED: Select additional fields (email, serviceId, rank)
+    const policeUsers = await User.find(query)
+        .select('username email details.jurisdiction details.serviceId details.rank status');
 
     res.json(policeUsers.map(p => ({
         id: p._id,
         name: p.username,
+        email: p.email, // Now included
         location: p.details?.jurisdiction,
+        serviceId: p.details?.serviceId, // Now included
+        rank: p.details?.rank, // Now included
         status: p.status,
     })));
 });
