@@ -6,6 +6,8 @@ const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
 const { sendCheckoutEmail } = require('../utils/sendEmail');
+// Import the verification function
+const { verifyGuestIdText } = require('./verification.controller');
 
 /**
  * @desc    Register a new guest
@@ -73,6 +75,15 @@ const registerGuest = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
+
+  // --- NEW VERIFICATION LOGIC ---
+  const verificationResult = await verifyGuestIdText(idImageFrontURL, primaryGuestData.name);
+  if (!verificationResult.match) {
+    // If verification fails, send a 400 error and stop the registration
+    res.status(400);
+    throw new Error(verificationResult.message);
+  }
+  // --- END NEW VERIFICATION LOGIC ---
 
   // Create guest record
   const guest = await Guest.create({

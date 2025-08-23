@@ -19,7 +19,13 @@ const uploadSingleImage = asyncHandler(async (req, res) => {
         const newPath = await cloudinaryUploadImage(path);
         
         // Clean up the locally saved file after uploading to Cloudinary
-        fs.unlinkSync(path);
+        // It's a good practice to wrap the unlink call in a try...catch
+        // to prevent the main function from failing due to cleanup errors.
+        try {
+            fs.unlinkSync(path);
+        } catch (unlinkError) {
+            console.error("Error unlinking local file:", unlinkError);
+        }
 
         res.status(200).json({
             message: "Image uploaded successfully",
