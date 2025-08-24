@@ -17,6 +17,12 @@ const { verifyGuestIdText } = require('./verification.controller');
 const registerGuest = asyncHandler(async (req, res) => {
   const hotelUserId = req.user._id;
 
+  // Create a map of files by their fieldname for easy lookup
+  const filesMap = req.files.reduce((map, file) => {
+    map[file.fieldname] = file;
+    return map;
+  }, {});
+
   const parseMaybeJson = (value, fallback) => {
     if (typeof value === 'string') {
       try { return JSON.parse(value); } catch { return fallback; }
@@ -24,19 +30,18 @@ const registerGuest = asyncHandler(async (req, res) => {
     return value ?? fallback;
   };
 
-  // Process accompanying guests and attach their image URLs
   const processGuests = (guestList, type) => {
     return guestList.map((guest, index) => {
+      // Find the correct files from our map
       return {
         ...guest,
-        idImageFrontURL: req.files[`${type}_${index}_idImageFront`]?.[0]?.path,
-        idImageBackURL: req.files[`${type}_${index}_idImageBack`]?.[0]?.path,
-        livePhotoURL: req.files[`${type}_${index}_livePhoto`]?.[0]?.path,
+        idImageFrontURL: filesMap[`${type}_${index}_idImageFront`]?.path,
+        idImageBackURL: filesMap[`${type}_${index}_idImageBack`]?.path,
+        livePhotoURL: filesMap[`${type}_${index}_livePhoto`]?.path,
       };
     });
   };
 
-  // Parse request body
   const primaryGuestData = {
     name: req.body.primaryGuestName,
     dob: req.body.primaryGuestDob,
@@ -62,30 +67,26 @@ const registerGuest = asyncHandler(async (req, res) => {
   const idType = req.body.idType;
   const idNumber = req.body.idNumber;
 
-  // Handle front + back ID images and live photo for primary guest
-  const idImageFrontFile = req.files?.idImageFront?.[0];
-  const idImageBackFile = req.files?.idImageBack?.[0];
-  const livePhotoFile = req.files?.livePhoto?.[0];
-
-  const idImageFrontURL = idImageFrontFile?.path || idImageFrontFile?.secure_url;
-  const idImageBackURL = idImageBackFile?.path || idImageBackFile?.secure_url;
-  const livePhotoURL = livePhotoFile?.path || livePhotoFile?.secure_url;
+  // Get file paths from our new filesMap
+  const idImageFrontURL = filesMap['idImageFront']?.path;
+  const idImageBackURL = filesMap['idImageBack']?.path;
+  const livePhotoURL = filesMap['livePhoto']?.path;
 
   if (!idImageFrontURL || !idImageBackURL || !livePhotoURL) {
     res.status(400);
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
 
-  // --- NEW VERIFICATION LOGIC ---
+  // --- MODIFICATION: OCR VERIFICATION DISABLED ---
+  /*
   const verificationResult = await verifyGuestIdText(idImageFrontURL, primaryGuestData.name);
   if (!verificationResult.match) {
-    // If verification fails, send a 400 error and stop the registration
     res.status(400);
     throw new Error(verificationResult.message);
   }
-  // --- END NEW VERIFICATION LOGIC ---
+  */
+  // --- END MODIFICATION ---
 
-  // Create guest record
   const guest = await Guest.create({
     primaryGuest: primaryGuestData,
     idType,
@@ -99,7 +100,8 @@ const registerGuest = asyncHandler(async (req, res) => {
   });
 
   logger.info(`New guest registered (${guest.customerId}) at ${req.user.username}`);
-  res.status(201).json(guest);
+  // MODIFICATION: Return a simple success message
+  res.status(201).json({ message: "Guest registered successfully!", guest });
 });
 
 /**
