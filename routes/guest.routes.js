@@ -23,11 +23,7 @@ router.post(
   protect,
   authorize('Hotel'),
   // 2. CHANGE THIS LINE: Use the correct variable name 'photoUpload'
-  photoUpload.fields([
-    { name: 'idImageFront', maxCount: 1 },
-    { name: 'idImageBack', maxCount: 1 },
-    { name: 'livePhoto', maxCount: 1 }
-  ]),
+  photoUpload.any(),
   registerGuest
 );
 
