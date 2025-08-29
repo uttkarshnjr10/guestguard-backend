@@ -7,7 +7,7 @@ const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
 const { sendCheckoutEmail } = require('../utils/sendEmail');
 // Import the verification function
-const { verifyGuestIdText } = require('./verification.controller');
+//const { verifyGuestIdText } = require('./verification.controller');
 
 /**
  * @desc    Register a new guest
@@ -24,7 +24,6 @@ const registerGuest = asyncHandler(async (req, res) => {
     return value ?? fallback;
   };
 
-  // Process accompanying guests and attach their image URLs
   const processGuests = (guestList, type) => {
     return guestList.map((guest, index) => {
       return {
@@ -36,7 +35,6 @@ const registerGuest = asyncHandler(async (req, res) => {
     });
   };
 
-  // Parse request body
   const primaryGuestData = {
     name: req.body.primaryGuestName,
     dob: req.body.primaryGuestDob,
@@ -62,7 +60,6 @@ const registerGuest = asyncHandler(async (req, res) => {
   const idType = req.body.idType;
   const idNumber = req.body.idNumber;
 
-  // Handle front + back ID images and live photo for primary guest
   const idImageFrontFile = req.files?.idImageFront?.[0];
   const idImageBackFile = req.files?.idImageBack?.[0];
   const livePhotoFile = req.files?.livePhoto?.[0];
@@ -76,14 +73,20 @@ const registerGuest = asyncHandler(async (req, res) => {
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
 
-  // --- NEW VERIFICATION LOGIC ---
+  // --- TEMPORARY BYPASS FOR BILLING ISSUE ---
+  // The following verification logic is commented out to prevent the Google Vision API error.
+  // Remember to re-enable this after you set up billing on your Google Cloud project.
+  
+  logger.warn('Google Vision ID verification is temporarily bypassed.'); // Added a warning log
+  
+  /* --- START OF COMMENTED-OUT BLOCK ---
   const verificationResult = await verifyGuestIdText(idImageFrontURL, primaryGuestData.name);
   if (!verificationResult.match) {
     // If verification fails, send a 400 error and stop the registration
     res.status(400);
     throw new Error(verificationResult.message);
   }
-  // --- END NEW VERIFICATION LOGIC ---
+  --- END OF COMMENTED-OUT BLOCK --- */
 
   // Create guest record
   const guest = await Guest.create({
