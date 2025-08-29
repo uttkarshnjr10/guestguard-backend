@@ -1,3 +1,4 @@
+// guest.controller.js (Final Resolved Version)
 const Guest = require('../models/Guest.model');
 const PoliceStation = require('../models/PoliceStation.model');
 const Notification = require('../models/Notification.model');
@@ -6,7 +7,6 @@ const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
 const { sendCheckoutEmail } = require('../utils/sendEmail');
-// Import the verification function
 const { verifyGuestIdText } = require('./verification.controller');
 
 /**
@@ -18,7 +18,7 @@ const registerGuest = asyncHandler(async (req, res) => {
   const hotelUserId = req.user._id;
 
   // Create a map of files by their fieldname for easy lookup
-  const filesMap = req.files.reduce((map, file) => {
+  const filesMap = (req.files || []).reduce((map, file) => {
     map[file.fieldname] = file;
     return map;
   }, {});
@@ -31,7 +31,7 @@ const registerGuest = asyncHandler(async (req, res) => {
   };
 
   const processGuests = (guestList, type) => {
-    return guestList.map((guest, index) => {
+    return (guestList || []).map((guest, index) => {
       // Find the correct files from our map
       return {
         ...guest,
@@ -66,7 +66,7 @@ const registerGuest = asyncHandler(async (req, res) => {
 
   const idType = req.body.idType;
   const idNumber = req.body.idNumber;
-
+  
   // Get file paths from our new filesMap
   const idImageFrontURL = filesMap['idImageFront']?.path;
   const idImageBackURL = filesMap['idImageBack']?.path;
@@ -77,15 +77,20 @@ const registerGuest = asyncHandler(async (req, res) => {
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
 
-  // --- MODIFICATION: OCR VERIFICATION DISABLED ---
-  /*
+  // --- TEMPORARY BYPASS FOR BILLING ISSUE ---
+  // The following verification logic is commented out to prevent the Google Vision API error.
+  // Remember to re-enable this after you set up billing on your Google Cloud project.
+  
+  logger.warn('Google Vision ID verification is temporarily bypassed.'); // Added a warning log
+  
+  /* --- START OF COMMENTED-OUT BLOCK ---
   const verificationResult = await verifyGuestIdText(idImageFrontURL, primaryGuestData.name);
   if (!verificationResult.match) {
+    // If verification fails, send a 400 error and stop the registration
     res.status(400);
     throw new Error(verificationResult.message);
   }
-  */
-  // --- END MODIFICATION ---
+  --- END OF COMMENTED-OUT BLOCK --- */
 
   const guest = await Guest.create({
     primaryGuest: primaryGuestData,
@@ -100,7 +105,7 @@ const registerGuest = asyncHandler(async (req, res) => {
   });
 
   logger.info(`New guest registered (${guest.customerId}) at ${req.user.username}`);
-  // MODIFICATION: Return a simple success message
+  // Return a clear success message along with the guest object
   res.status(201).json({ message: "Guest registered successfully!", guest });
 });
 
@@ -216,7 +221,7 @@ const searchGuests = asyncHandler(async (req, res) => {
 
   // --- Notification logic ---
   try {
-    const searchingOfficer = await User.findById(req.user._id).populate('policeStation');
+    const searchingOfficer = await User.findById(Ireq.user._id).populate('policeStation');
     const guestAddress = guest.primaryGuest.address;
     const guestPincode = guestAddress?.split('-').pop().trim(); // assumes last part is pincode
 
