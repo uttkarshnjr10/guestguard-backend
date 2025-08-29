@@ -1,3 +1,4 @@
+// guest.controller.js (Final Resolved Version)
 const Guest = require('../models/Guest.model');
 const PoliceStation = require('../models/PoliceStation.model');
 const Notification = require('../models/Notification.model');
@@ -7,7 +8,7 @@ const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
 const { sendCheckoutEmail } = require('../utils/sendEmail');
 // Import the verification function
-//const { verifyGuestIdText } = require('./verification.controller');
+const { verifyGuestIdText } = require('./verification.controller');
 
 /**
  * @desc    Register a new guest
