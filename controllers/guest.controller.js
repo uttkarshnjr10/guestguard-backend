@@ -42,8 +42,18 @@ const registerGuest = asyncHandler(async (req, res) => {
     gender: req.body.primaryGuestGender,
     phone: req.body.primaryGuestPhone,
     email: req.body.primaryGuestEmail,
-    address: req.body.primaryGuestAddress,
+    // Construct the address object from individual fields
+    address: {
+        street: req.body.primaryGuestAddressStreet,
+        city: req.body.primaryGuestAddressCity,
+        state: req.body.primaryGuestAddressState,
+        zipCode: req.body.primaryGuestAddressZipCode,
+        country: req.body.primaryGuestAddressCountry
+    },
+    // Add the new nationality field
+    nationality: req.body.primaryGuestNationality
   };
+  // -- END OF REPLACEMENT --
 
   const stayDetails = {
     purposeOfVisit: req.body.purposeOfVisit,
@@ -80,14 +90,14 @@ const registerGuest = asyncHandler(async (req, res) => {
   
   logger.warn('Google Vision ID verification is temporarily bypassed.'); // Added a warning log
   
-  /* --- START OF COMMENTED-OUT BLOCK ---
+  /*     Hold This for now 
   const verificationResult = await verifyGuestIdText(idImageFrontURL, primaryGuestData.name);
   if (!verificationResult.match) {
     // If verification fails, send a 400 error and stop the registration
     res.status(400);
     throw new Error(verificationResult.message);
   }
-  --- END OF COMMENTED-OUT BLOCK --- */
+           */
 
   // Create guest record
   const guest = await Guest.create({
