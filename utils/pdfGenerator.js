@@ -16,7 +16,8 @@ const PDFDocument = require('pdfkit');
 const config = {
   document: {
     size: 'A4',
-    margin: 40,
+    margin: 30, // Reduced margin to fit more content
+    layout: 'portrait',
   },
   fonts: {
     bold: 'Helvetica-Bold',
@@ -24,193 +25,252 @@ const config = {
     italic: 'Helvetica-Oblique',
   },
   fontSizes: {
-    header: 22,
-    subheader: 14,
-    body: 11,
-    footer: 10,
+    header: 20,
+    subheader: 13, // Slightly reduced
+    body: 9.5,     // Slightly reduced for better fit
+    footer: 8.5,    // Slightly reduced
+    notes: 8,
   },
   colors: {
-    primaryText: '#000000', // Black for main text
-    secondaryText: '#555555', // A lighter grey for secondary info
-    divider: '#cccccc', // Light grey for dividers
+    // A modern, professional color palette
+    primary: '#1976D2',   // Slightly more vibrant Blue for headers and titles
+    secondary: '#2196F3', // Lighter Blue
+    textPrimary: '#222222', // Darker Gray for main text
+    textSecondary: '#555555', // Lighter Gray
+    background: '#FFFFFF', // White
+    panelBackground: '#F8F8F8', // Very light gray for panels (subtle)
+    divider: '#EEEEEE',   // Light gray for borders and dividers
+    headerText: '#FFFFFF', // White text for dark backgrounds
   },
   layout: {
-    columnGap: 20,
-    get columnWidth() {
-      return (this.pageWidth - this.margin * 2 - this.columnGap) / 2;
-    },
+    margin: 30, // Match document margin
     pageWidth: 595.28, // A4 width in points
-    margin: 40,
+    pageHeight: 841.89, // A4 height in points
+    get contentWidth() {
+      return this.pageWidth - this.margin * 2;
+    },
   },
+  // IMPORTANT: Add the path to your logo here
+  logoPath: null, // Example: 'assets/logo.png'
 };
+
 
 // =============================================================================
 // PRIVATE HELPER FUNCTIONS
 // These internal functions are responsible for drawing specific parts of the PDF.
-// They are not exported and are used only by the main generateGuestPDF function.
 // =============================================================================
 
 /**
- * Draws the main header of the PDF document.
+ * Draws the main header with a logo and a colored background.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
  */
 const _drawHeader = (doc) => {
+  // Draw a background color rectangle for the header
+  doc
+    .rect(0, 0, config.layout.pageWidth, 90) // Slightly reduced height
+    .fill(config.colors.primary);
+
+  // If a logo path is provided, draw it.
+  if (config.logoPath) {
+    doc.image(config.logoPath, config.layout.margin, 15, { // Adjusted Y position
+      fit: [70, 70], // Slightly smaller logo
+      align: 'center',
+      valign: 'center',
+    });
+  }
+
+  // Draw the header text
   doc
     .font(config.fonts.bold)
     .fontSize(config.fontSizes.header)
-    .fillColor(config.colors.primaryText)
-    .text('CENTRALIZED DATA MANAGEMENT', { align: 'center' })
-    .fontSize(config.fontSizes.subheader)
+    .fillColor(config.colors.headerText)
+    .text('CENTRALIZED DATA MANAGEMENT', config.layout.margin, 30, { // Adjusted Y position
+      align: 'right',
+      width: config.layout.contentWidth,
+    });
+
+  doc
     .font(config.fonts.normal)
-    .text('Guest Stay Record', { align: 'center' })
-    .moveDown(2);
+    .fontSize(config.fontSizes.subheader)
+    .text('Guest Stay Record', { align: 'right', width: config.layout.contentWidth });
+
+  // Move cursor down below the header area
+  doc.y = 100; // Adjusted start Y for content
 };
 
 /**
  * Draws a horizontal divider line.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
- * @param {number} y - The vertical position to draw the line.
  */
 const _drawDivider = (doc, y = doc.y) => {
   doc
     .strokeColor(config.colors.divider)
-    .lineWidth(1)
+    .lineWidth(0.5)
     .moveTo(config.layout.margin, y)
-    .lineTo(doc.page.width - config.layout.margin, y)
+    .lineTo(config.layout.pageWidth - config.layout.margin, y)
     .stroke();
-  doc.moveDown();
+  doc.moveDown(1.5);
 };
 
 /**
- * Draws the hotel and stay information in a two-column layout.
+ * Draws a section with a titled background panel.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
- * @param {object} guest - The guest data object.
  */
-const _drawHotelAndStayDetails = (doc, guest) => {
-  const startY = doc.y;
-  _drawDivider(doc, startY);
-
-  const leftColumnX = config.layout.margin;
-  const rightColumnX = leftColumnX + config.layout.columnWidth + config.layout.columnGap;
-  const columnStartY = startY + 15; // Start text below the divider
-
-  // Left Column: Hotel Information
-  doc
-    .font(config.fonts.bold)
-    .fontSize(config.fontSizes.subheader)
-    .text('Hotel Information', leftColumnX, columnStartY);
-  doc.moveDown(0.5);
-  doc
-    .font(config.fonts.normal)
-    .fontSize(config.fontSizes.body)
-    .fillColor(config.colors.secondaryText)
-    .text(`Hotel Name: ${guest.hotel?.username || 'N/A'}`)
-    .text(`Location: ${guest.hotel?.details?.city || 'N/A'}`);
-
-  const leftColumnHeight = doc.y;
-
-  // Right Column: Stay Information
-  doc
-    .font(config.fonts.bold)
-    .fontSize(config.fontSizes.subheader)
-    .fillColor(config.colors.primaryText)
-    .text('Stay Information', rightColumnX, columnStartY);
-  doc.moveDown(0.5);
-  doc
-    .font(config.fonts.normal)
-    .fontSize(config.fontSizes.body)
-    .fillColor(config.colors.secondaryText)
-    .text(`Check-In: ${new Date(guest.stayDetails.checkIn).toLocaleString()}`)
-    .text(`Check-Out: ${new Date().toLocaleString()}`)
-    .text(`Room Number: ${guest.stayDetails.roomNumber || 'N/A'}`);
+const _drawSectionPanel = (doc, title, contentDrawer) => {
+    // Calculate position and dimensions
+    const startY = doc.y;
+    const padding = 12; // Reduced padding for better fit
+    const contentX = doc.x + padding; // Relative to doc.x which is config.layout.margin
     
-  // Ensure the cursor moves below the taller of the two columns
-  doc.y = Math.max(doc.y, leftColumnHeight) + 20;
+    // Use a temporary doc to calculate height before drawing
+    let tempDoc = new PDFDocument(config.document);
+    tempDoc.x = contentX;
+    tempDoc.y = startY + padding + 20; // Simulate initial text position
+    contentDrawer(tempDoc);
+    const contentHeight = tempDoc.y - startY + padding * 2; // Adjusted height calculation
+
+    // Draw the rounded rectangle background
+    doc
+      .roundedRect(doc.x, startY, config.layout.contentWidth, contentHeight + 10, 5) // Added a little extra height for safety
+      .fill(config.colors.panelBackground);
+
+    // Draw the section title
+    doc
+      .font(config.fonts.bold)
+      .fontSize(config.fontSizes.subheader)
+      .fillColor(config.colors.primary)
+      .text(title, contentX, startY + padding);
+      
+    // Set cursor position and draw the actual content
+    doc.x = contentX;
+    doc.y = startY + padding + 20; // Below the title, adjusted for smaller font/padding
+    contentDrawer(doc);
+
+    // Move cursor below the drawn panel
+    doc.y = startY + contentHeight + 10 + 15; // Adjusted spacing between sections
 };
 
 /**
- * Draws the primary guest's details.
+ * Renders hotel and stay details content.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
- * @param {object} guest - The guest data object.
  */
-const _drawGuestDetails = (doc, guest) => {
-  doc
-    .font(config.fonts.bold)
-    .fontSize(config.fontSizes.subheader)
-    .fillColor(config.colors.primaryText)
-    .text('Primary Guest Details');
-  doc.moveDown(0.5);
-  
+const _renderHotelAndStayDetails = (doc, guest) => {
+    const sectionStartY = doc.y;
+    const columnWidth = (config.layout.contentWidth - (doc.x - config.layout.margin) * 2 - 30) / 2; // Dynamic column width calculation
+    const leftColumnX = doc.x;
+    const rightColumnX = leftColumnX + columnWidth + 30; // Spacing between columns
+
+    // Left Column: Hotel Information
+    doc.font(config.fonts.bold).fillColor(config.colors.textPrimary).text('Hotel Information');
+    doc.moveDown(0.5);
+    doc
+      .font(config.fonts.normal)
+      .fontSize(config.fontSizes.body)
+      .fillColor(config.colors.textSecondary)
+      .text(`Hotel Name: ${guest.hotel?.username || 'N/A'}`)
+      .text(`Location: ${guest.hotel?.details?.city || 'N/A'}`);
+
+    const leftColumnHeight = doc.y;
+
+    // Format dates for better readability
+    const checkInDate = guest.stayDetails.checkIn ? new Date(guest.stayDetails.checkIn).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+    const checkOutDate = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Right Column: Stay Information
+    doc.y = sectionStartY; // Reset Y to top of section for the right column
+    doc
+      .font(config.fonts.bold)
+      .fillColor(config.colors.textPrimary)
+      .text('Stay Information', rightColumnX);
+    doc.moveDown(0.5);
+    doc
+      .font(config.fonts.normal)
+      .fontSize(config.fontSizes.body)
+      .fillColor(config.colors.textSecondary)
+      .text(`Check-In: ${checkInDate}`, rightColumnX)
+      .text(`Check-Out: ${checkOutDate}`, rightColumnX)
+      .text(`Room Number: ${guest.stayDetails.roomNumber || 'N/A'}`, rightColumnX);
+
+    // Ensure cursor is below the tallest column before exiting
+    doc.y = Math.max(doc.y, leftColumnHeight);
+};
+
+/**
+ * Renders the primary guest's details content.
+ * @private
+ */
+const _renderGuestDetails = (doc, guest) => {
   doc
     .font(config.fonts.normal)
     .fontSize(config.fontSizes.body)
-    .fillColor(config.colors.secondaryText)
+    .fillColor(config.colors.textSecondary)
     .text(`Customer ID: ${guest.customerId}`)
     .text(`Name: ${guest.primaryGuest.name}`)
     .text(`Phone: ${guest.primaryGuest.phone}`)
     .text(`Address: ${guest.primaryGuest.address}`);
-  doc.moveDown();
 };
 
 /**
- * Draws the details of any accompanying guests.
+ * Renders the details of accompanying guests.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
- * @param {object} guest - The guest data object.
  */
-const _drawAccompanyingGuests = (doc, guest) => {
+const _renderAccompanyingGuests = (doc, guest) => {
   const adults = guest.accompanyingGuests?.adults || [];
   const children = guest.accompanyingGuests?.children || [];
 
   if (adults.length === 0 && children.length === 0) {
-    return; // Do not render this section if there are no accompanying guests
+    doc.font(config.fonts.italic).fillColor(config.colors.textSecondary).text('No accompanying guests.');
+    return;
   }
 
-  doc
-    .font(config.fonts.bold)
-    .fontSize(config.fontSizes.subheader)
-    .fillColor(config.colors.primaryText)
-    .text('Accompanying Guests');
-  doc.moveDown(0.5);
-
   if (adults.length > 0) {
-    doc.font(config.fonts.bold).text('Adults: ', { continued: true });
-    doc.font(config.fonts.normal).text(adults.map(a => a.name).join(', '));
+    doc.font(config.fonts.bold).fillColor(config.colors.textPrimary).text('Adults: ', { continued: true });
+    doc.font(config.fonts.normal).fillColor(config.colors.textSecondary).text(adults.map(a => a.name).join(', '));
     doc.moveDown(0.5);
   }
   if (children.length > 0) {
-    doc.font(config.fonts.bold).text('Children: ', { continued: true });
-    doc.font(config.fonts.normal).text(children.map(c => c.name).join(', '));
+    doc.font(config.fonts.bold).fillColor(config.colors.textPrimary).text('Children: ', { continued: true });
+    doc.font(config.fonts.normal).fillColor(config.colors.textSecondary).text(children.map(c => c.name).join(', '));
   }
-  doc.moveDown();
 };
 
 /**
  * Draws the footer of the PDF document.
  * @private
- * @param {PDFDocument} doc - The PDFDocument instance.
  */
 const _drawFooter = (doc) => {
-  // Position the footer at a fixed location from the bottom of the page
-  const footerY = doc.page.height - 60;
-  _drawDivider(doc, footerY);
+  const footerHeight = 70; // Increased footer height for the message
+  const footerY = config.layout.pageHeight - footerHeight;
   
+  // Draw background color rectangle for the footer
+  doc
+    .rect(0, footerY, config.layout.pageWidth, footerHeight)
+    .fill(config.colors.primary);
+
+  // Thank You Message
+  doc
+    .fontSize(config.fontSizes.footer + 1) // Slightly larger for emphasis
+    .font(config.fonts.bold)
+    .fillColor(config.colors.headerText)
+    .text(
+      'Thank you for choosing us!',
+      config.layout.margin,
+      footerY + 15,
+      { align: 'center', width: config.layout.contentWidth }
+    );
+  
+  // Tagline
   doc
     .fontSize(config.fontSizes.footer)
     .font(config.fonts.italic)
-    .fillColor(config.colors.secondaryText)
+    .fillColor(config.colors.headerText)
     .text(
-      'Thank you for choosing us. We wish you a safe journey ahead.',
+      'We wish you a safe journey ahead.',
       config.layout.margin,
-      footerY + 15, // Position text below the divider
-      { align: 'center' }
+      footerY + 35, // Position below the main thank you
+      { align: 'center', width: config.layout.contentWidth }
     );
 };
-
 
 // =============================================================================
 // PUBLIC EXPORTED FUNCTION
@@ -219,11 +279,10 @@ const _drawFooter = (doc) => {
 /**
  * Generates a guest checkout PDF from a guest data object.
  * This function orchestrates the PDF creation by calling modular helper functions.
- * It's wrapped in a Promise to handle the asynchronous nature of stream-based I/O.
  *
- * @param {object} guest - The guest Mongoose document, must contain nested objects for hotel, primaryGuest, etc.
+ * @param {object} guest - The guest Mongoose document.
  * @returns {Promise<Buffer>} A promise that resolves with the PDF data as a Buffer.
- * @throws {Error} Rejects the promise if any error occurs during PDF generation.
+ * @throws {Error} Rejects the promise if any error occurs.
  */
 function generateGuestPDF(guest) {
   return new Promise((resolve, reject) => {
@@ -231,23 +290,37 @@ function generateGuestPDF(guest) {
       const doc = new PDFDocument(config.document);
       const buffers = [];
 
-      // Event listeners to handle the stream
       doc.on('data', buffers.push.bind(buffers));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', reject); // Propagate any errors to the promise rejection
+      doc.on('error', reject);
 
       // --- Build the PDF document structure ---
       _drawHeader(doc);
-      _drawHotelAndStayDetails(doc, guest);
-      _drawGuestDetails(doc, guest);
-      _drawAccompanyingGuests(doc, guest);
+      
+      // Ensure current Y is within bounds for the first section
+      doc.y = Math.min(doc.y, config.layout.pageHeight - 200); // Prevent sections from starting too low
+
+      _drawSectionPanel(doc, 'Stay & Hotel Details', (d) => _renderHotelAndStayDetails(d, guest));
+      
+      // Add a check here to ensure there's enough space for the next section
+      if (doc.y + 150 > config.layout.pageHeight - 90) { // Estimate space needed for next section + footer
+          doc.addPage(); // If truly necessary, add page, but goal is single page
+          doc.y = config.layout.margin + 20; // Reset Y for new page
+      }
+      _drawSectionPanel(doc, 'Primary Guest Details', (d) => _renderGuestDetails(d, guest));
+      
+      if (doc.y + 100 > config.layout.pageHeight - 90) { // Estimate space needed for next section + footer
+          doc.addPage();
+          doc.y = config.layout.margin + 20;
+      }
+      _drawSectionPanel(doc, 'Accompanying Guests', (d) => _renderAccompanyingGuests(d, guest));
+      
+      // Draw footer always at the bottom of the *last* page, which should be the only page
       _drawFooter(doc);
 
-      // Finalize the PDF. This triggers the 'end' event.
       doc.end();
 
     } catch (error) {
-      // Catch synchronous errors (e.g., invalid input)
       console.error('Error during PDF generation setup:', error);
       reject(error);
     }

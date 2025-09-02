@@ -10,6 +10,8 @@ const notificationRoutes = require('./routes/notification.routes');
 const { notFound, errorHandler } = require('./middleware/error.middleware'); // >> Import centralized handlers
 const policeStationRoutes = require('./routes/policeStation.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const autocompleteRoutes = require('./routes/autocomplete.routes');
+const ocrRoutes = require('./routes/ocr.routes');
 
 dotenv.config();
 connectDB();
@@ -39,6 +41,8 @@ app.use('/api/police', require('./routes/police.routes.js'));
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/stations', policeStationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/autocomplete', autocompleteRoutes);
+app.use('/api/ocr', ocrRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running successfully.');

@@ -8,7 +8,14 @@ const individualGuestSchema = new mongoose.Schema({
     gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
-    address: { type: String, required: true, trim: true },
+    // --- CHANGE STARTS HERE ---
+    address: {
+        street: { type: String, trim: true },
+        city: { type: String, required: true, trim: true },
+        state: { type: String, trim: true },
+        zipCode: { type: String, trim: true },
+        country: { type: String, required: true, trim: true }
+    },
 }, { _id: false });
 
 // Main guest schema
