@@ -7,4 +7,4 @@ services:
     startCommand: npm start
     envVars:
       - key: MONGO_URI
-        value: mongodb+srv://uttkarshkumar687:ZDqHrkCXxdfLpbzc@cluster0.wv3xwuc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+        sync: false
