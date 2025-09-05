@@ -42,17 +42,17 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 });
 
-// >> THIS IS THE MISSING FUNCTION
+
 const authorize = (...roles) => {
     return (req, res, next) => {
-        // The 'protect' middleware must run first to attach `req.user`
+      
         if (!req.user || !roles.includes(req.user.role)) {
-            res.status(403); // 403 Forbidden is more appropriate for authorization errors
+            res.status(403); 
             throw new Error(`User role '${req.user.role}' is not authorized for this resource`);
         }
         next();
     };
 };
 
-// >> Now both functions are defined and can be exported
+
 module.exports = { protect, authorize };
