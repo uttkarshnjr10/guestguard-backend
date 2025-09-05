@@ -87,9 +87,9 @@ const registerGuest = asyncHandler(async (req, res) => {
     throw new Error('Image upload failed. idImageFront, idImageBack, and livePhoto are required');
   }
 
-  // --- TEMPORARY BYPASS FOR BILLING ISSUE ---
+
   // The following verification logic is commented out to prevent the Google Vision API error.
-  // Remember to re-enable this after you set up billing on your Google Cloud project.
+  
   
   logger.warn('Google Vision ID verification is temporarily bypassed.'); // Added a warning log
   

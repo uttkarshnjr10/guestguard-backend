@@ -17,7 +17,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
 
-        // ✅ NEW: Check if the user's account is suspended
+        //  Check if the user's account is suspended
         if (user.status === 'Suspended') {
             res.status(403); // Forbidden
             throw new Error('Your account has been suspended. Please contact the administrator.');

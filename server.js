@@ -1,65 +1,73 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const helmet = require('helmet'); // >> For security headers
-const morgan = require('morgan'); // >> For request logging
+const helmet = require('helmet');
+const morgan = require('morgan');
 const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redisClient');
 const logger = require('./utils/logger');
-const notificationRoutes = require('./routes/notification.routes');
-const { notFound, errorHandler } = require('./middleware/error.middleware'); // >> Import centralized handlers
-const policeStationRoutes = require('./routes/policeStation.routes');
-const uploadRoutes = require('./routes/upload.routes');
-const autocompleteRoutes = require('./routes/autocomplete.routes');
-const ocrRoutes = require('./routes/ocr.routes');
+const { notFound, errorHandler } = require('./middleware/error.middleware');
 
+// 1. Load env
 dotenv.config();
+
+// 2. Connect DB & Redis
 connectDB();
 connectRedis();
 
 const app = express();
 
-// --- Core Middleware ---
-app.use(cors({
- origin: ["http://localhost:5173", "https://guest-guard.vercel.app" ],
-  credentials: true
-}));
+// 3. CORS setup
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',')
+  : [];
 
-app.use(helmet()); // >> Use Helmet to set secure HTTP headers
-app.use(express.json());
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // allowed
+    } else {
+      callback(new Error('Origin not allowed by CORS')); // blocked
+    }
+  },
+  credentials: true,
+};
 
-// >> Use Morgan for logging in development mode
+// 4. Middleware
+app.use(cors(corsOptions)); // CORS
+app.use(helmet());          // Security headers
+app.use(express.json());    // JSON parser
+
+
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
+  app.use(morgan('dev'));   // Logging
 }
 
-// --- API Routes ---
+// 5. Routes
 app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/stations', policeStationRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/autocomplete', autocompleteRoutes);
-app.use('/api/ocr', ocrRoutes);
+app.use('/api/notifications', require('./routes/notification.routes'));
+app.use('/api/stations', require('./routes/policeStation.routes'));
+app.use('/api/upload', require('./routes/upload.routes'));
+app.use('/api/autocomplete', require('./routes/autocomplete.routes'));
+app.use('/api/ocr', require('./routes/ocr.routes'));
 
-app.get('/', (req, res) => {
-  res.send('API is running successfully.');
-});
+app.get('/', (req, res) => res.send('API running'));
 
-// Error Handling 
+// 6. Error handling
+app.use(notFound);      // 404
+app.use(errorHandler);  // All errors
 
-app.use(notFound);
-app.use(errorHandler);
-
+// 7. Start server
 const PORT = process.env.PORT || 5000;
-
 const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });
 
+// 8. Unhandled rejection
 process.on('unhandledRejection', (err, promise) => {
-  logger.error(`Unhandled Rejection: ${err.message}`);
+  logger.error(`Unhandled: ${err.message}`);
   server.close(() => process.exit(1));
 });
