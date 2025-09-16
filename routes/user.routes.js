@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 
-// >> Make sure all necessary functions are imported from the controller
+
 const { 
     registerUser, 
     getUserProfile, 
