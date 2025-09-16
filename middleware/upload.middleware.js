@@ -21,22 +21,10 @@ const storage = new CloudinaryStorage({
     },
 });
 
-const hotelInquiryStorage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'hotel_inquiries', // New folder for better organization
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-    },
-});
-
-const hotelInquiryUpload = multer({ storage: hotelInquiryStorage }).fields([
-    { name: 'ownerSignature', maxCount: 1 },
-    { name: 'hotelStamp', maxCount: 1 }
-]);
 // Initialize Multer with the storage configuration
 
 // 1. Initialize Multer and name the variable 'photoUpload'
 const photoUpload = multer({ storage: storage });
 
 // 2. Export it inside an object
-module.exports = { photoUpload, hotelInquiryUpload  };
+module.exports = { photoUpload };
