@@ -7,7 +7,6 @@ const asyncHandler = require('express-async-handler');
 const logger = require('../utils/logger');
 const generateGuestPDF = require('../utils/pdfGenerator');
 const { sendCheckoutEmail } = require('../utils/sendEmail');
-// Import the verification function
 const { verifyGuestIdText } = require('./verification.controller');
 
 /**
@@ -18,6 +17,12 @@ const { verifyGuestIdText } = require('./verification.controller');
 const registerGuest = asyncHandler(async (req, res) => {
   const hotelUserId = req.user._id;
 
+  // Create a map of files by their fieldname for easy lookup
+  const filesMap = (req.files || []).reduce((map, file) => {
+    map[file.fieldname] = file;
+    return map;
+  }, {});
+
   const parseMaybeJson = (value, fallback) => {
     if (typeof value === 'string') {
       try { return JSON.parse(value); } catch { return fallback; }
@@ -26,12 +31,13 @@ const registerGuest = asyncHandler(async (req, res) => {
   };
 
   const processGuests = (guestList, type) => {
-    return guestList.map((guest, index) => {
+    return (guestList || []).map((guest, index) => {
+      // Find the correct files from our map
       return {
         ...guest,
-        idImageFrontURL: req.files[`${type}_${index}_idImageFront`]?.[0]?.path,
-        idImageBackURL: req.files[`${type}_${index}_idImageBack`]?.[0]?.path,
-        livePhotoURL: req.files[`${type}_${index}_livePhoto`]?.[0]?.path,
+        idImageFrontURL: filesMap[`${type}_${index}_idImageFront`]?.path,
+        idImageBackURL: filesMap[`${type}_${index}_idImageBack`]?.path,
+        livePhotoURL: filesMap[`${type}_${index}_livePhoto`]?.path,
       };
     });
   };
@@ -70,14 +76,11 @@ const registerGuest = asyncHandler(async (req, res) => {
 
   const idType = req.body.idType;
   const idNumber = req.body.idNumber;
-
-  const idImageFrontFile = req.files?.idImageFront?.[0];
-  const idImageBackFile = req.files?.idImageBack?.[0];
-  const livePhotoFile = req.files?.livePhoto?.[0];
-
-  const idImageFrontURL = idImageFrontFile?.path || idImageFrontFile?.secure_url;
-  const idImageBackURL = idImageBackFile?.path || idImageBackFile?.secure_url;
-  const livePhotoURL = livePhotoFile?.path || livePhotoFile?.secure_url;
+  
+  // Get file paths from our new filesMap
+  const idImageFrontURL = filesMap['idImageFront']?.path;
+  const idImageBackURL = filesMap['idImageBack']?.path;
+  const livePhotoURL = filesMap['livePhoto']?.path;
 
   if (!idImageFrontURL || !idImageBackURL || !livePhotoURL) {
     res.status(400);
@@ -99,7 +102,6 @@ const registerGuest = asyncHandler(async (req, res) => {
   }
            */
 
-  // Create guest record
   const guest = await Guest.create({
     primaryGuest: primaryGuestData,
     idType,
@@ -113,7 +115,8 @@ const registerGuest = asyncHandler(async (req, res) => {
   });
 
   logger.info(`New guest registered (${guest.customerId}) at ${req.user.username}`);
-  res.status(201).json(guest);
+  // Return a clear success message along with the guest object
+  res.status(201).json({ message: "Guest registered successfully!", guest });
 });
 
 /**
@@ -228,7 +231,7 @@ const searchGuests = asyncHandler(async (req, res) => {
 
   // --- Notification logic ---
   try {
-    const searchingOfficer = await User.findById(req.user._id).populate('policeStation');
+    const searchingOfficer = await User.findById(Ireq.user._id).populate('policeStation');
     const guestAddress = guest.primaryGuest.address;
     const guestPincode = guestAddress?.split('-').pop().trim(); // assumes last part is pincode
 

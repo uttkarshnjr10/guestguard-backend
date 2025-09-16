@@ -9,13 +9,11 @@ const {
   searchGuests,
   getTodaysGuests,
   getAllGuests
-} = require('../controllers/guest.controller');
+} = require('../controllers/guest.controller.js'); 
 
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { protect, authorize } = require('../middleware/auth.middleware.js');
 
-const { photoUpload } = require('../middleware/upload.middleware');
-
-
+const { photoUpload } = require('../middleware/upload.middleware.js');
 
 // Register guest with file uploads (front ID, back ID, live photo)
 router.post(
@@ -28,6 +26,7 @@ router.post(
     { name: 'idImageBack', maxCount: 1 },
     { name: 'livePhoto', maxCount: 1 }
   ]),
+  
   registerGuest
 );
 
@@ -55,7 +54,7 @@ router.put(
   checkoutGuest
 );
 
-// --- Police Route ---
+//  Police Route
 router.get(
   '/search',
   protect,
