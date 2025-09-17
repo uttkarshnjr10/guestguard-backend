@@ -48,12 +48,12 @@ app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
-app.use('/api/notifications', require('./routes/notification.routes'));
-app.use('/api/stations', require('./routes/policeStation.routes'));
-app.use('/api/upload', require('./routes/upload.routes'));
-app.use('/api/autocomplete', require('./routes/autocomplete.routes'));
-app.use('/api/ocr', require('./routes/ocr.routes'));
-
+app.use('/api/notifications', require('./routes/notification.routes.js'));
+app.use('/api/stations', require('./routes/policeStation.routes.js'));
+app.use('/api/upload', require('./routes/upload.routes.js'));
+app.use('/api/autocomplete', require('./routes/autocomplete.routes.js'));
+app.use('/api/ocr', require('./routes/ocr.routes.js'));
+app.use('/api/inquiries', require('./routes/inquiry.routes.js'));
 app.get('/', (req, res) => res.send('API running'));
 
 // 6. Error handling

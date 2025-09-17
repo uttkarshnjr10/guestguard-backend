@@ -27,7 +27,7 @@ function findBestNameMatch(name, textBlock) {
 }
 
 /**
- * @desc    Reusable function to verify text from an ID image
+ * @desc     Reusable function to verify text from an ID image
  */
 const verifyGuestIdText = async (imageUrl, nameEntered) => {
     if (!imageUrl || !nameEntered) {
@@ -72,7 +72,7 @@ const verifyGuestIdText = async (imageUrl, nameEntered) => {
             };
         }
     } catch (error) {
-        console.error('Google Vision API Error:', error);
+        // console.error('Google Vision API Error:', error);
         return {
             match: false,
             message: 'Failed to process ID card image.'

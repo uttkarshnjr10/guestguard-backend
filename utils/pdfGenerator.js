@@ -28,7 +28,7 @@ const config = {
     header: 20,
     subheader: 13, // Slightly reduced
     body: 9.5,     // Slightly reduced for better fit
-    footer: 8.5,    // Slightly reduced
+    footer: 8.5,   // Slightly reduced
     notes: 8,
   },
   colors: {
@@ -321,7 +321,7 @@ function generateGuestPDF(guest) {
       doc.end();
 
     } catch (error) {
-      console.error('Error during PDF generation setup:', error);
+      // console.error('Error during PDF generation setup:', error);
       reject(error);
     }
   });

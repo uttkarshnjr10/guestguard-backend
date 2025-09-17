@@ -8,12 +8,9 @@ const crypto = require('crypto');
 
 
 // --- Create a new user (Admin action) ---
-
 const registerUser = asyncHandler(async (req, res) => {
-    // This log will help confirm data arrival
-    console.log("--- INCOMING REQUEST BODY ---", req.body);
+    // console.log("--- INCOMING REQUEST BODY ---", req.body);
 
-    // >> 2. Destructure policeStation from the request body
     const { username, email, role, details, policeStation } = req.body;
 
     const userExists = await User.findOne({ email });
@@ -23,10 +20,8 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User with this email already exists');
     }
 
-    // >> 3. Use crypto for a more secure temporary password
     const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
-    // Create the user data object
     const userToCreate = {
         username,
         email,
@@ -36,7 +31,6 @@ const registerUser = asyncHandler(async (req, res) => {
         details: details || {},
     };
 
-    // >> 4. Conditionally add policeStation ONLY if the role is 'Police'
     if (role === 'Police') {
         userToCreate.policeStation = policeStation;
     }
@@ -158,17 +152,16 @@ const getHotelUsers = asyncHandler(async (req, res) => {
         ];
     }
 
-    // UPDATED: Select more hotel specific details
     const hotels = await User.find(query)
         .select('username email details.hotelName details.address details.phone status');
 
     res.json(hotels.map(h => ({
         id: h._id,
         name: h.username,
-        email: h.email, // Include email
-        hotelName: h.details?.hotelName, // Include hotelName
-        address: h.details?.address, // Include address
-        phone: h.details?.phone, // Include phone
+        email: h.email,
+        hotelName: h.details?.hotelName,
+        address: h.details?.address,
+        phone: h.details?.phone,
         city: h.details?.city,
         status: h.status,
     })));
@@ -275,17 +268,16 @@ const getPoliceUsers = asyncHandler(async (req, res) => {
         ];
     }
 
-    // MODIFIED: Select additional fields (email, serviceId, rank)
     const policeUsers = await User.find(query)
         .select('username email details.jurisdiction details.serviceId details.rank status');
 
     res.json(policeUsers.map(p => ({
         id: p._id,
         name: p.username,
-        email: p.email, // Now included
+        email: p.email,
         location: p.details?.jurisdiction,
-        serviceId: p.details?.serviceId, // Now included
-        rank: p.details?.rank, // Now included
+        serviceId: p.details?.serviceId,
+        rank: p.details?.rank,
         status: p.status,
     })));
 });
