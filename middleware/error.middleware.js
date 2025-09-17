@@ -7,7 +7,7 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-// Error handler
+
 const errorHandler = (err, req, res, next) => {
   // CORS error
   if (err.message === "Origin not allowed by CORS") {

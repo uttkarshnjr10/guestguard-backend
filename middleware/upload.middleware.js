@@ -11,20 +11,20 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure Multer to use Cloudinary for storage
+
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'guest-guard', // The name of the folder in Cloudinary
+        folder: 'guest-guard', 
         allowed_formats: ['jpg', 'png', 'jpeg'],
-        transformation: [{ width: 500, height: 500, crop: 'limit' }] // Resize images
+        transformation: [{ width: 500, height: 500, crop: 'limit' }] 
     },
 });
 
 const hotelInquiryStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'hotel_inquiries', // New folder for better organization
+        folder: 'hotel_inquiries', 
         allowed_formats: ['jpg', 'png', 'jpeg'],
     },
 });
@@ -33,10 +33,10 @@ const hotelInquiryUpload = multer({ storage: hotelInquiryStorage }).fields([
     { name: 'ownerSignature', maxCount: 1 },
     { name: 'hotelStamp', maxCount: 1 }
 ]);
+
 // Initialize Multer with the storage configuration
 
-// 1. Initialize Multer and name the variable 'photoUpload'
 const photoUpload = multer({ storage: storage });
 
-// 2. Export it inside an object
+// Export it inside an object
 module.exports = { photoUpload, hotelInquiryUpload  };

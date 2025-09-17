@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const inquiryController = require('../controllers/inquiry.Controller.js');
+const inquiryController = require('../controllers/inquiry.controller.js');
 const { hotelInquiryUpload } = require('../middleware/upload.middleware.js');
 
 

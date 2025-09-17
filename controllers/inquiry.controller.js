@@ -11,7 +11,7 @@ exports.submitHotelInquiry = async (req, res) => {
 
         // Create a new inquiry document
         const newInquiry = new HotelInquiry({
-            ...req.body, // Use the spread operator to get all text fields
+            ...req.body, 
             ownerSignature: {
                 public_id: req.files.ownerSignature[0].filename,
                 url: req.files.ownerSignature[0].path
@@ -29,7 +29,7 @@ exports.submitHotelInquiry = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error submitting hotel inquiry:", error);
+        // console.error("Error submitting hotel inquiry:", error);
         res.status(500).json({ message: 'Server error. Please try again later.' });
     }
 };
@@ -39,7 +39,7 @@ exports.getPendingInquiries = async (req, res) => {
         const inquiries = await HotelInquiry.find({ status: 'pending' }).sort({ createdAt: -1 });
         res.status(200).json(inquiries);
     } catch (error) {
-        console.error("Error fetching pending inquiries:", error);
+        // console.error("Error fetching pending inquiries:", error);
         res.status(500).json({ message: 'Server error. Please try again later.' });
     }
 };

@@ -8,9 +8,9 @@ const Alert = require('../models/Alert.model');
 const Remark = require('../models/Remark.model');
 
 /**
- * @desc    Search for guests
- * @route   POST /api/police/search
- * @access  Private/Police
+ * @desc     Search for guests
+ * @route    POST /api/police/search
+ * @access   Private/Police
  */
 const searchGuests = asyncHandler(async (req, res) => {
     const { query, searchBy, reason } = req.body;
@@ -53,26 +53,22 @@ const searchGuests = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get data for the police dashboard
- * @route   GET /api/police/dashboard
- * @access  Private/Police
+ * @desc     Get data for the police dashboard
+ * @route    GET /api/police/dashboard
+ * @access   Private/Police
  */
 const getDashboardData = asyncHandler(async (req, res) => {
-    // Count total registered hotels
     const hotelCount = await User.countDocuments({ role: 'Hotel' });
 
-    // Calculate the start and end of today
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    // Count guests who checked in today
     const guestsTodayCount = await Guest.countDocuments({
         registrationTimestamp: { $gte: startOfToday, $lte: endOfToday }
     });
 
-    // Placeholder for alerts (can be connected to your Alerts model later)
     const recentAlerts = [
         { id: 1, message: "Alert feature is under development." }
     ];
@@ -84,9 +80,9 @@ const getDashboardData = asyncHandler(async (req, res) => {
     });
 });
 /**
- * @desc    Create a new alert for a guest
- * @route   POST /api/police/alerts
- * @access  Private/Police
+ * @desc     Create a new alert for a guest
+ * @route    POST /api/police/alerts
+ * @access   Private/Police
  */
 const createAlert = asyncHandler(async (req, res) => {
     const { guestId, reason } = req.body;
@@ -120,12 +116,11 @@ const createAlert = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get all alerts
- * @route   GET /api/police/alerts
- * @access  Private/Police
+ * @desc     Get all alerts
+ * @route    GET /api/police/alerts
+ * @access   Private/Police
  */
 const getAlerts = asyncHandler(async (req, res) => {
-    // Fetch alerts and populate details about the guest and the creating officer
     const alerts = await Alert.find()
         .populate('guest', 'primaryGuest.name idNumber')
         .populate('createdBy', 'username details.station')
@@ -135,9 +130,9 @@ const getAlerts = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Resolve an alert
- * @route   PUT /api/police/alerts/:id/resolve
- * @access  Private/Police
+ * @desc     Resolve an alert
+ * @route    PUT /api/police/alerts/:id/resolve
+ * @access   Private/Police
  */
 const resolveAlert = asyncHandler(async (req, res) => {
     const alert = await Alert.findById(req.params.id);
@@ -154,9 +149,9 @@ const resolveAlert = asyncHandler(async (req, res) => {
     res.status(200).json(alert);
 });
 /**
- * @desc    Get a specific guest's full history
- * @route   GET /api/police/guests/:id/history
- * @access  Private/Police
+ * @desc     Get a specific guest's full history
+ * @route    GET /api/police/guests/:id/history
+ * @access   Private/Police
  */
 const getGuestHistory = asyncHandler(async (req, res) => {
     const guestId = req.params.id;
@@ -190,9 +185,9 @@ const getGuestHistory = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Add a remark to a guest's profile
- * @route   POST /api/police/guests/:id/remarks
- * @access  Private/Police
+ * @desc     Add a remark to a guest's profile
+ * @route    POST /api/police/guests/:id/remarks
+ * @access   Private/Police
  */
 const addRemark = asyncHandler(async (req, res) => {
     const guestId = req.params.id;

@@ -43,18 +43,17 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));   // Logging
 }
 
-// 5. Routes
-// 5. Routes
+// Routes
 app.use('/api/auth', require('./routes/auth.routes.js'));
 app.use('/api/users', require('./routes/user.routes.js'));
 app.use('/api/guests', require('./routes/guest.routes.js'));
 app.use('/api/police', require('./routes/police.routes.js'));
 app.use('/api/notifications', require('./routes/notification.routes.js')); 
 app.use('/api/stations', require('./routes/policeStation.routes.js'));    
-app.use('/api/upload', require('./routes/upload.routes.js'));             
+app.use('/api/upload', require('./routes/upload.routes.js'));            
 app.use('/api/autocomplete', require('./routes/autocomplete.routes.js')); 
 app.use('/api/ocr', require('./routes/ocr.routes.js'));                  
-app.use('/api/inquiries', require('./routes/inquiryRoutes.routes.js')); 
+app.use('/api/inquiries', require('./routes/inquiry.routes.js')); 
 
 app.get('/', (req, res) => res.send('API running'));
 
