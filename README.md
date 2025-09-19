@@ -1,95 +1,132 @@
+# ApnaManager - Backend API
+
+ApnaManager is the backend service for a comprehensive guest data management system built for the hospitality industry. It provides a secure, centralized platform for hotels to manage guest information and for law enforcement officials to access data securely, in compliance with regional regulations.
+
+The application features a robust, role-based API designed to serve **Regional Admins**, **Hotel Staff**, and **Police Officials**, with distinct permissions and capabilities for each role.
+
+---
+
+## Core Backend Features
+
+* **Secure API Architecture:** Implements a robust security layer using JWT for stateless authentication, bcrypt for password hashing, and security headers via Helmet.
+* **Role-Based Access Control (RBAC):** Secure, segregated endpoints for Admins, Hotels, and Police, ensuring users only access data they are authorized to see.
+* **Data Management API:** Provides a complete set of RESTful endpoints for creating, reading, updating, and deleting data related to users, hotels, and guests.
+* **File Upload Handling:** Uses **Multer** for efficient handling of `multipart/form-data` and seamless integration with **Cloudinary** for secure cloud storage of guest photos and ID documents.
+* **Session & Cache Management:** Leverages **Redis** for high-performance caching and for managing a token blacklist to instantly invalidate JWTs upon user logout.
+* **OCR Integration:** Contains server-side logic that integrates with the Google Cloud Vision API to perform OCR on uploaded ID cards, automating data extraction.
+* **Automated Services:** Includes modules for automated PDF receipt generation using **PDFKit** and reliable email delivery for user notifications and checkouts via **SendGrid**.
+* **Advanced Search & Auditing:** Features optimized search endpoints with database indexing for fast queries and maintains a comprehensive audit trail for all sensitive data access.
+
+---
+
+## Technology Stack
+
 <div align="center">
-  <img src="https://placehold.co/600x250/3498db/ffffff?text=GuestGuard&font=sans" alt="GuestGuard Banner" />
-  <h1>GuestGuard Backend API</h1>
-  <p><b>Secure & centralized guest data management system for hotels, designed to streamline hospitality operations and assist law enforcement.</b></p>
-  
-  <p>
-    <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js" alt="Node.js version" />
-    <img src="https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express" alt="Express.js version" />
-    <img src="https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB version" />
-    <img src="https://img.shields.io/badge/Redis-7.x-DC382D?style=for-the-badge&logo=redis" alt="Redis version" />
-  </p>
+
+**Core Backend**<br>
+<img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js" alt="Node.js" />
+<img src="https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express" alt="Express.js" />
+
+**Database & Caching**<br>
+<img src="https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB" />
+<img src="https://img.shields.io/badge/Mongoose-8.x-47A248?style=for-the-badge&logo=mongodb" alt="Mongoose" />
+<img src="https://img.shields.io/badge/Redis-7.x-DC382D?style=for-the-badge&logo=redis" alt="Redis" />
+
+**Authentication & File Handling**<br>
+<img src="https://img.shields.io/badge/JWT-JSON_Web_Tokens-000000?style=for-the-badge&logo=jsonwebtokens" alt="JWT" />
+<img src="https://img.shields.io/badge/Bcrypt-Hashing-6242F5?style=for-the-badge&logo=springsecurity" alt="Bcrypt" />
+<img src="https://img.shields.io/badge/Multer-File_Uploads-orange?style=for-the-badge" alt="Multer" />
+
+**External Services & APIs**<br>
+<img src="https://img.shields.io/badge/Cloudinary-Media_Storage-3448C5?style=for-the-badge&logo=cloudinary" alt="Cloudinary" />
+<img src="https://img.shields.io/badge/SendGrid-Email_Delivery-1A82E2?style=for-the-badge&logo=sendgrid" alt="SendGrid" />
+<img src="https://img.shields.io/badge/Google_Cloud_Vision-OCR-4285F4?style=for-the-badge&logo=googlecloud" alt="Google Cloud Vision" />
+
 </div>
 
 ---
 
-## 📜 About the Project
-**GuestGuard** is a backend service built with **Node.js** and **Express** that powers a guest management platform for the hospitality sector.  
-It provides **role-based APIs** for **Regional Admins, Hotel Staff, and Police Officials**, handling everything from user onboarding to **real-time guest registration, OCR-powered ID scanning, and inter-jurisdictional police alerts**.
+## Getting Started
 
----
+Follow these instructions to get a local copy of the project up and running for development and testing purposes.
 
-## ✨ Core Features
-- 🔑 **Role-Based Access Control (RBAC):** Separate, secure endpoints for Admins, Hotels, and Police.  
-- 🏨 **User & Hotel Management:** Admins can create and manage hotel and police accounts.  
-- 📝 **Guest Registration:** Hotels register guests with detailed info + document uploads.  
-- 🖼 **Secure Image Handling:** Guest photos & ID docs stored on **Cloudinary**.  
-- 🤖 **AI-Powered OCR:** Auto-fills guest forms by scanning ID cards with **Google Cloud Vision**.  
-- 🔎 **Advanced Police Search:** Search by name, phone, or ID with full audit trails.  
-- 📖 **Guest History & Alerts:** View complete stay history and add police alerts.  
-- 📩 **Automated Emails & PDFs:** Beautiful PDF receipts emailed at checkout.  
-- 🛡 **Security First:** JWT auth, bcrypt password hashing, rate limiting, Redis token blacklisting.  
+### Prerequisites
 
----
+You will need the following software installed on your machine:
 
-## 🛠 Tech Stack
-| Category         | Technology / Library |
-|------------------|----------------------|
-| Core Backend     | Node.js, Express |
-| Database         | MongoDB, Mongoose |
-| Caching & Tokens | Redis |
-| Authentication   | JWT, bcrypt.js |
-| File Uploads     | Multer, Cloudinary |
-| Security         | Helmet, CORS, Rate Limit |
-| Emails & PDFs    | SendGrid, PDFKit |
-| OCR & AI         | Google Cloud Vision |
-| Dev Tools        | Nodemon, Morgan, Dotenv |
+* **Node.js** (v18.x or later)
+* **MongoDB** (v6.x or later)
+* **Redis** (v7.x or later)
 
----
+### Installation
 
-## 🚀 Getting Started
+1.  **Clone the repository:**
+    ```sh
+    git clone [https://github.com/uttkarshnjr10/guestguard-backend.git](https://github.com/uttkarshnjr10/guestguard-backend.git)
+    cd guestguard-backend
+    ```
 
-### ✅ Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [MongoDB](https://www.mongodb.com/)
-- [Redis](https://redis.io/)
+2.  **Install NPM packages:**
+    ```sh
+    npm install
+    ```
 
-### 🔧 Installation
-```bash
-# Clone the repository
-git clone https://github.com/uttkarshnjr10/guestguard-backend.git
-cd guestguard-backend
+### Environment Configuration
 
-# Install dependencies
-npm install
+1.  Create a `.env` file in the root of the project by making a copy of the example file:
+    ```sh
+    cp .env.example .env
+    ```
 
----
+2.  Open the `.env` file and update the variables with your specific configuration:
 
-⚙️ Environment Setup
+    ```ini
+    # --- Application Configuration ---
+    PORT=5000
+    NODE_ENV=development
+    FRONTEND_URL=http://localhost:5173
 
-Create a .env file (see .env.example) and configure:
-PORT=5000
-NODE_ENV=development
-MONGO_URI=your_mongodb_connection_string
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=your_secret_key
-CLOUDINARY_CLOUD_NAME=xxx
-CLOUDINARY_API_KEY=xxx
-CLOUDINARY_API_SECRET=xxx
-SENDGRID_API_KEY=xxx
-FROM_EMAIL=your_verified_email@example.com
-FRONTEND_URL=http://localhost:5173
-ADMIN_USERNAME=admin
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=supersecret
+    # --- Database & Cache ---
+    MONGO_URI=your_mongodb_connection_string
+    REDIS_URL=redis://localhost:6379
 
-▶️ Run the Server
+    # --- Authentication & Security ---
+    JWT_SECRET=your_strong_jwt_secret_key
 
-# Seed initial Admin user
-npm run seed
+    # --- Initial Admin User (for seeding) ---
+    ADMIN_USERNAME=admin
+    ADMIN_EMAIL=admin@example.com
+    ADMIN_PASSWORD=a_strong_and_secure_password
 
-# Start development server
-npm run dev
+    # --- Third-Party Service Keys ---
+    # Cloudinary for file storage
+    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+    CLOUDINARY_API_KEY=your_cloudinary_api_key
+    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Start production server
-npm start
+    # SendGrid for sending emails
+    SENDGRID_API_KEY=your_sendgrid_api_key
+    FROM_EMAIL=your_verified_sendgrid_email@example.com
+    ```
+
+### Running the Application
+
+1.  **Seed the database:**
+    This command will create the initial Regional Admin user based on the credentials in your `.env` file.
+    ```sh
+    npm run seed
+    ```
+
+2.  **Start the development server:**
+    This will run the application with `nodemon`, which automatically restarts the server on file changes.
+    ```sh
+    npm run dev
+    ```
+
+3.  **Start the production server:**
+    For production, use the `start` command.
+    ```sh
+    npm start
+    ```
+
+The API will now be running on the port you specified in your `.env` file (e.g., `http://localhost:5000`).
