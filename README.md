@@ -17,31 +17,30 @@ The entire application is containerized with Docker, allowing for a seamless, on
   * **External API Integration:** Connects with the **Google Cloud Vision API** to perform Optical Character Recognition (OCR) on guest ID cards, enabling automated data extraction.
 
 -----
-
 ## Technology Stack
 
-\<div align="center"\>
+<div align="center">
 
 **Core Backend**<br>
-\<img src="[https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge\&logo=node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js)" alt="Node.js" /\>
-\<img src="[https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge\&logo=express](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express)" alt="Express.js" /\>
+<img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js" alt="Node.js" />
+<img src="https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express" alt="Express.js" />
 
 **Database & Caching**<br>
-\<img src="[https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge\&logo=mongodb](https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb)" alt="MongoDB" /\>
-\<img src="[https://img.shields.io/badge/Mongoose-8.x-47A248?style=for-the-badge\&logo=mongodb](https://img.shields.io/badge/Mongoose-8.x-47A248?style=for-the-badge&logo=mongodb)" alt="Mongoose" /\>
-\<img src="[https://img.shields.io/badge/Redis-7.x-DC382D?style=for-the-badge\&logo=redis](https://img.shields.io/badge/Redis-7.x-DC382D?style=for-the-badge&logo=redis)" alt="Redis" /\>
+<img src="https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB" />
+<img src="https://img.shields.io/badge/Mongoose-8.x-47A248?style=for-the-badge&logo=mongodb" alt="Mongoose" />
+<img src="https://img.shields.io/badge/Redis-7.x-DC382D?style=for-the-badge&logo=redis" alt="Redis" />
 
 **Authentication & File Handling**<br>
-\<img src="[https://img.shields.io/badge/JWT-JSON\_Web\_Tokens-000000?style=for-the-badge\&logo=jsonwebtokens](https://img.shields.io/badge/JWT-JSON_Web_Tokens-000000?style=for-the-badge&logo=jsonwebtokens)" alt="JWT" /\>
-\<img src="[https://img.shields.io/badge/Bcrypt-Hashing-6242F5?style=for-the-badge\&logo=springsecurity](https://img.shields.io/badge/Bcrypt-Hashing-6242F5?style=for-the-badge&logo=springsecurity)" alt="Bcrypt" /\>
-\<img src="[https://img.shields.io/badge/Multer-File\_Uploads-orange?style=for-the-badge](https://img.shields.io/badge/Multer-File_Uploads-orange?style=for-the-badge)" alt="Multer" /\>
+<img src="https://img.shields.io/badge/JWT-JSON_Web_Tokens-000000?style=for-the-badge&logo=jsonwebtokens" alt="JWT" />
+<img src="https://img.shields.io/badge/Bcrypt-Hashing-6242F5?style=for-the-badge&logo=springsecurity" alt="Bcrypt" />
+<img src="https://img.shields.io/badge/Multer-File_Uploads-orange?style=for-the-badge" alt="Multer" />
 
 **External Services & APIs**<br>
-\<img src="[https://img.shields.io/badge/Cloudinary-Media\_Storage-3448C5?style=for-the-badge\&logo=cloudinary](https://img.shields.io/badge/Cloudinary-Media_Storage-3448C5?style=for-the-badge&logo=cloudinary)" alt="Cloudinary" /\>
-\<img src="[https://img.shields.io/badge/SendGrid-Email\_Delivery-1A82E2?style=for-the-badge\&logo=sendgrid](https://img.shields.io/badge/SendGrid-Email_Delivery-1A82E2?style=for-the-badge&logo=sendgrid)" alt="SendGrid" /\>
-\<img src="[https://img.shields.io/badge/Google\_Cloud\_Vision-OCR-4285F4?style=for-the-badge\&logo=googlecloud](https://img.shields.io/badge/Google_Cloud_Vision-OCR-4285F4?style=for-the-badge&logo=googlecloud)" alt="Google Cloud Vision" /\>
+<img src="https://img.shields.io/badge/Cloudinary-Media_Storage-3448C5?style=for-the-badge&logo=cloudinary" alt="Cloudinary" />
+<img src="https://img.shields.io/badge/SendGrid-Email_Delivery-1A82E2?style=for-the-badge&logo=sendgrid" alt="SendGrid" />
+<img src="https://img.shields.io/badge/Google_Cloud_Vision-OCR-4285F4?style=for-the-badge&logo=googlecloud" alt="Google Cloud Vision" />
 
-\</div\>
+</div>
 
 -----
 
