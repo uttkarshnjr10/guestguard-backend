@@ -1,55 +1,43 @@
 // seeder.js
-
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const logger = require('./utils/logger');
-const User = require('./models/User.model');
+const logger = require('./src/utils/logger');
+const User = require('./src/models/User.model');
 
-// Load environment variables
 dotenv.config();
 
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        logger.info('MongoDB Connected for Seeding...');
+        logger.info('mongodb connected for seeding...');
     } catch (err) {
-        logger.error(`Error connecting to DB for seeding: ${err.message}`);
+        logger.error(`error connecting to db for seeding: ${err.message}`);
         process.exit(1);
     }
 };
 
 const importData = async () => {
     try {
-        // First, check if an admin already exists to prevent accidental overwrites
-        const adminExists = await User.findOne({ role: 'Regional Admin' });
-        if (adminExists) {
-            logger.warn('An admin user already exists. Seeding aborted.');
-            process.exit();
-            return;
-        }
+        await User.deleteMany({ role: 'Regional Admin' });
 
-        // Create the user object with the PLAIN TEXT password from .env
-        // The User model's pre-save hook will handle the hashing.
         const adminUser = {
-            username: process.env.ADMIN_USERNAME,
-            email: process.env.ADMIN_EMAIL,
-            password: process.env.ADMIN_PASSWORD, // Provide the plain password
+            username: process.env.ADMIN_USERNAME || 'admin',
+            email: process.env.ADMIN_EMAIL || 'admin@example.com',
+            password: process.env.ADMIN_PASSWORD || 'password123',
             role: 'Regional Admin',
             passwordChangeRequired: false, 
         };
 
-        // User.create() will trigger the pre-save hook in the model
         await User.create(adminUser);
 
-        logger.info('Admin user has been successfully created! ✅');
+        logger.info('admin user has been successfully created! ');
         process.exit();
     } catch (error) {
-        logger.error(`Error during seeding: ${error.message}`);
+        logger.error(`error during seeding: ${error.message}`);
         process.exit(1);
     }
 };
 
-// Immediately connect and run the import
 connectDB().then(() => {
     importData();
 });
