@@ -11,6 +11,7 @@ const ApiResponse = require('../utils/ApiResponse');
 const registerGuest = asyncHandler(async (req, res) => {
     const hotelUserId = req.user._id;
 
+    // Build file map once
     const filesMap = (req.files || []).reduce((map, file) => {
         map[file.fieldname] = file;
         return map;
@@ -18,7 +19,11 @@ const registerGuest = asyncHandler(async (req, res) => {
 
     const parseMaybeJson = (value, fallback) => {
         if (typeof value === 'string') {
-            try { return JSON.parse(value); } catch { return fallback; }
+            try { 
+                return JSON.parse(value); 
+            } catch { 
+                return fallback; 
+            }
         }
         return value ?? fallback;
     };
@@ -34,6 +39,16 @@ const registerGuest = asyncHandler(async (req, res) => {
         });
     };
 
+    // Validate required images early
+    const idImageFrontURL = filesMap['idImageFront']?.path;
+    const idImageBackURL = filesMap['idImageBack']?.path;
+    const livePhotoURL = filesMap['livePhoto']?.path;
+
+    if (!idImageFrontURL || !idImageBackURL || !livePhotoURL) {
+        throw new ApiError(400, 'image upload failed. front, back, and live photos are required');
+    }
+
+    // Extract and process data in parallel where possible
     const primaryGuestData = {
         name: req.body.primaryGuestName,
         dob: req.body.primaryGuestDob,
@@ -63,16 +78,9 @@ const registerGuest = asyncHandler(async (req, res) => {
         children: processGuests(accompanyingGuestsRaw.children, 'child'),
     };
 
-    const idImageFrontURL = filesMap['idImageFront']?.path;
-    const idImageBackURL = filesMap['idImageBack']?.path;
-    const livePhotoURL = filesMap['livePhoto']?.path;
-
-    if (!idImageFrontURL || !idImageBackURL || !livePhotoURL) {
-        throw new ApiError(400, 'image upload failed. front, back, and live photos are required');
-    }
-
     logger.warn('google vision id verification is temporarily bypassed.');
 
+    // Create guest document
     const guest = await Guest.create({
         primaryGuest: primaryGuestData,
         idType: req.body.idType,
@@ -86,9 +94,26 @@ const registerGuest = asyncHandler(async (req, res) => {
     });
 
     logger.info(`new guest registered (${guest.customerId}) at ${req.user.username}`);
-    res
-    .status(201)
-    .json(new ApiResponse(201, guest, "guest registered successfully!"));
+
+    res.status(201).json(new ApiResponse(201, guest, "guest registered successfully!"));
+
+    // Non-blocking operations - run in background
+   /* setImmediate(async () => {
+        try {
+            const populatedGuest = await Guest.findById(guest._id).populate('hotel', 'username email details');
+            
+            const pdfBuffer = await generateGuestPDF(populatedGuest);
+            const guestEmail = populatedGuest.primaryGuest.email;
+            const hotelEmail = populatedGuest.hotel.email;
+            const hotelName = populatedGuest.hotel.details.hotelName || populatedGuest.hotel.username;
+
+            if (guestEmail && hotelEmail) {
+                await sendCheckoutEmail(guestEmail, hotelEmail, populatedGuest.primaryGuest.name, hotelName, pdfBuffer);
+            }
+        } catch (error) {
+            logger.error(`Background email send failed for guest ${guest.customerId}:`, error);
+        }
+    });*/
 });
 
 const getAllGuests = asyncHandler(async (req, res) => {
