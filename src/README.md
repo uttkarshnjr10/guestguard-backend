@@ -1,24 +1,22 @@
-# ApnaManager - Backend API
+# ApnaManager - Hotel Management Backend API
 
-ApnaManager is the backend service for a comprehensive guest data management system built for the hospitality industry. It provides a secure, centralized platform for hotels to manage guest information and for law enforcement officials to access data securely, in compliance with regional regulations.
+ApnaManager is a secure and scalable backend service for a guest data management system designed for the hospitality industry and law enforcement. It features a robust, role-based RESTful API that serves **Regional Admins**, **Hotel Staff**, and **Police Officials** with segregated permissions and capabilities.
 
-The application features a robust, role-based API designed to serve **Regional Admins**, **Hotel Staff**, and **Police Officials**, with distinct permissions and capabilities for each role.
+The entire application is containerized with Docker, allowing for a seamless, one-command setup of the backend, database, and cache.
 
----
+-----
 
-## Core Backend Features
+## Core Features
 
-* **Secure API Architecture:** Implements a robust security layer using JWT for stateless authentication, bcrypt for password hashing, and security headers via Helmet.
-* **Role-Based Access Control (RBAC):** Secure, segregated endpoints for Admins, Hotels, and Police, ensuring users only access data they are authorized to see.
-* **Data Management API:** Provides a complete set of RESTful endpoints for creating, reading, updating, and deleting data related to users, hotels, and guests.
-* **File Upload Handling:** Uses **Multer** for efficient handling of `multipart/form-data` and seamless integration with **Cloudinary** for secure cloud storage of guest photos and ID documents.
-* **Session & Cache Management:** Leverages **Redis** for high-performance caching and for managing a token blacklist to instantly invalidate JWTs upon user logout.
-* **OCR Integration:** Contains server-side logic that integrates with the Google Cloud Vision API to perform OCR on uploaded ID cards, automating data extraction.
-* **Automated Services:** Includes modules for automated PDF receipt generation using **PDFKit** and reliable email delivery for user notifications and checkouts via **SendGrid**.
-* **Advanced Search & Auditing:** Features optimized search endpoints with database indexing for fast queries and maintains a comprehensive audit trail for all sensitive data access.
+  * **Secure Authentication:** Implements stateless authentication using **JSON Web Tokens (JWT)** and securely hashes user passwords with **bcrypt**.
+  * **Role-Based Access Control (RBAC):** Middleware protects all sensitive endpoints, ensuring users (Admin, Hotel, Police) can only access resources appropriate for their role.
+  * **Containerized Environment:** Fully containerized with **Docker** and **Docker Compose**, allowing developers to spin up the entire application stack (Node.js, MongoDB, Redis) with a single command (`docker-compose up`).
+  * **Cloud Media Management:** Integrates **Multer** and **Cloudinary** for efficient handling of image uploads, ensuring guest photos and ID documents are stored securely in the cloud.
+  * **High-Performance Caching:** Uses **Redis** to manage a JWT blacklist for instant user logout and can be extended for high-performance caching of frequent database queries.
+  * **Automated Services:** Features modules for on-the-fly PDF receipt generation with **PDFKit** and automated email delivery for user credentials and notifications via **SendGrid**.
+  * **External API Integration:** Connects with the **Google Cloud Vision API** to perform Optical Character Recognition (OCR) on guest ID cards, enabling automated data extraction.
 
----
-
+-----
 ## Technology Stack
 
 <div align="center">
@@ -44,89 +42,123 @@ The application features a robust, role-based API designed to serve **Regional A
 
 </div>
 
----
+-----
 
 ## Getting Started
 
-Follow these instructions to get a local copy of the project up and running for development and testing purposes.
+Follow these instructions to get a local copy of the project up and running.
 
 ### Prerequisites
 
-You will need the following software installed on your machine:
+  * **Docker** and **Docker Compose**
+  * **Node.js** (v18.x or later) for local development (optional)
 
-* **Node.js** (v18.x or later)
-* **MongoDB** (v6.x or later)
-* **Redis** (v7.x or later)
+### 🚀 Run with Docker (Recommended)
 
-### Installation
+This is the fastest and most reliable way to run the application.
 
 1.  **Clone the repository:**
+
     ```sh
     git clone [https://github.com/uttkarshnjr10/guestguard-backend.git](https://github.com/uttkarshnjr10/guestguard-backend.git)
     cd guestguard-backend
     ```
 
-2.  **Install NPM packages:**
+2.  **Configure Environment:**
+    Create a `.env` file in the root directory and add the necessary environment variables (see `.env` Configuration section below). **Important:** For Docker, the database and Redis hosts must be the service names.
+
+    ```ini
+    MONGO_URI=mongodb://mongo:27017/ApnaManager
+    REDIS_URL=redis://redis:6379
+    ```
+
+3.  **Build and Run:**
+
+    ```sh
+    docker-compose up
+    ```
+
+    To run in the background, use `docker-compose up -d`. The API will be available at `http://localhost:5003`.
+
+### 💻 Run Locally (Manual Setup)
+
+1.  **Install Dependencies:**
+
     ```sh
     npm install
     ```
 
-### Environment Configuration
-
-1.  Create a `.env` file in the root of the project by making a copy of the example file:
-    ```sh
-    cp .env.example .env
-    ```
-
-2.  Open the `.env` file and update the variables with your specific configuration:
+2.  **Configure Environment:**
+    Create a `.env` file and fill in the variables. Ensure your local MongoDB and Redis services are running.
 
     ```ini
-    # --- Application Configuration ---
-    PORT=5000
-    NODE_ENV=development
-    FRONTEND_URL=http://localhost:5173
-
-    # --- Database & Cache ---
-    MONGO_URI=your_mongodb_connection_string
+    MONGO_URI=mongodb://localhost:27017/ApnaManager
     REDIS_URL=redis://localhost:6379
-
-    # --- Authentication & Security ---
-    JWT_SECRET=your_strong_jwt_secret_key
-
-    # --- Initial Admin User (for seeding) ---
-    ADMIN_USERNAME=admin
-    ADMIN_EMAIL=admin@example.com
-    ADMIN_PASSWORD=a_strong_and_secure_password
-
-    # --- Third-Party Service Keys ---
-    # Cloudinary for file storage
-    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-    CLOUDINARY_API_KEY=your_cloudinary_api_key
-    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-    # SendGrid for sending emails
-    SENDGRID_API_KEY=your_sendgrid_api_key
-    FROM_EMAIL=your_verified_sendgrid_email@example.com
     ```
 
-### Running the Application
+3.  **Run the Application:**
 
-1.  **Seed the database:**
-    This command will create the initial Regional Admin user based on the credentials in your `.env` file.
-    ```sh
-    npm run seed
-    ```
-
-2.  **Start the development server:**
-    This will run the application with `nodemon`, which automatically restarts the server on file changes.
     ```sh
     npm run dev
     ```
 
-3.  **Start the production server:**
-    For production, use the `start` command.
-    ```sh
-    npm start
-    ```
+-----
 
-The API will now be running on the port you specified in your `.env` file (e.g., `http://localhost:5000`).
+## `.env` Configuration
+
+Create a `.env` file in the project root and add the following variables:
+
+```ini
+# --- Application Configuration ---
+PORT=5003
+NODE_ENV=development
+
+# --- Database & Cache ---
+# For Docker:
+MONGO_URI=mongodb://mongo:27017/ApnaManager
+REDIS_URL=redis://redis:6379
+# For Local:
+# MONGO_URI=mongodb://localhost:27017/ApnaManager
+# REDIS_URL=redis://localhost:6379
+
+# --- Authentication & Security ---
+JWT_SECRET=your_strong_jwt_secret_key
+
+# --- Initial Admin User (for seeding) ---
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=a_strong_and_secure_password
+
+# --- Third-Party Service Keys ---
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+SENDGRID_API_KEY=your_sendgrid_api_key
+FROM_EMAIL=your_verified_sendgrid_email@example.com
+```
+
+-----
+
+## API Endpoints Overview
+
+A summary of the main API routes available in the application.
+
+| Method | Endpoint | Role | Description |
+| :--- | :--- | :--- | :--- |
+| **Auth** | | | |
+| `POST` | `/api/auth/login` | Public | Authenticate a user and receive a JWT. |
+| `POST` | `/api/auth/logout`| Private | Log out a user and invalidate their token. |
+| **Admin** | | | |
+| `POST` | `/api/users/register` | Admin | Create a new Hotel or Police user. |
+| `GET` | `/api/users/hotels` | Admin | Get a list of all hotel users. |
+| `PUT` | `/api/users/:id/status`| Admin | Suspend or activate a user account. |
+| `POST` | `/api/stations` | Admin | Create a new police station. |
+| **Hotel** | | | |
+| `POST` | `/api/guests/register`| Hotel | Register a new guest with ID and photos. |
+| `GET` | `/api/guests/all` | Hotel | Get a list of all guests for the hotel. |
+| `PUT` | `/api/guests/:id/checkout`| Hotel | Check a guest out and email a receipt. |
+| **Police** | | | |
+| `POST` | `/api/police/search`| Police | Search for guests across all hotels. |
+| `POST` | `/api/police/alerts`| Police | Create a security alert for a guest. |
+| `GET`| `/api/police/guests/:id/history` | Police | Get a guest's complete stay history. |
